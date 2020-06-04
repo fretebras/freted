@@ -1,6 +1,13 @@
 {
   "extends": [
-    "oclif",
-    "oclif-typescript"
-  ]
+    "airbnb-typescript/base"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "class-methods-use-this": "off",
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off"
+  }
 }

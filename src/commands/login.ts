@@ -1,19 +1,19 @@
-import {Command} from '@oclif/command'
-import RepositoryService from '../repository/service'
-import inquirer = require('inquirer')
-import Config from '../config'
+import { Command } from '@oclif/command';
+import RepositoryService from '../repository/service';
+import * as inquirer from 'inquirer';
+import Config from '../config';
 
 export default class Update extends Command {
-  static description = 'authenticate to supported providers'
+  static description = 'authenticate to supported providers';
 
   static examples = [
     '$ fretectl login',
-  ]
+  ];
 
   private repositoryService = new RepositoryService();
 
   async run() {
-    const {provider, name, url, token} = await inquirer.prompt([
+    const answers = await inquirer.prompt([
       {
         name: 'provider',
         message: 'Provider',
@@ -31,30 +31,32 @@ export default class Update extends Command {
         message: 'Server URL',
         type: 'input',
         default: 'https://gitlab.fretebras.com.br/',
-        when: ({provider}) => {
-          return provider === 'GitLab'
-        },
+        when: ({ provider }) => provider === 'GitLab',
       },
       {
         name: 'token',
         message: 'Type your Personal Token',
         type: 'password',
-        validate: async (token, answers) => {
-          if (!answers) return false
-          const {provider} = answers
+        validate: async (token, partialAnswers) => {
+          if (!partialAnswers) return false;
+          const { provider } = partialAnswers;
 
           const valid = await this.repositoryService.validateToken(
             provider,
-            token
-          )
+            token,
+          );
 
-          return valid || 'Invalid token. Check the token and if you granted the right roles to the token.'
+          return valid || 'Invalid token. Check the token and if you granted the right roles to the token.';
         },
       },
-    ])
+    ]);
 
-    Config.addProvider(provider, name, url, token)
+    const {
+      provider, name, url, token,
+    } = answers;
 
-    this.log(`Successfully authenticated to ${provider}`)
+    Config.addProvider(provider, name, url, token);
+
+    this.log(`Successfully authenticated to ${provider}`);
   }
 }

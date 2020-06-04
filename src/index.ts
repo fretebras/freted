@@ -1,1 +1,1 @@
-export {run} from '@oclif/command'
+export { run as default } from '@oclif/command';

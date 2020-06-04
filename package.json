@@ -25,10 +25,11 @@
     "@types/listr": "^0.14.2",
     "@types/mocha": "^5",
     "@types/node": "^10",
+    "@typescript-eslint/eslint-plugin": "^3.1.0",
     "chai": "^4",
     "eslint": "^5.13",
-    "eslint-config-oclif": "^3.1",
-    "eslint-config-oclif-typescript": "^0.1",
+    "eslint-config-airbnb-typescript": "^8.0.2",
+    "eslint-plugin-import": "^2.20.2",
     "globby": "^10",
     "mocha": "^5",
     "nyc": "^14",
@@ -60,9 +61,10 @@
   "repository": "https://gitlab.fretebras.com.br/fretecli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
-    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "posttest": "yarn lint",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "lint": "eslint ./src --ext .ts",
     "version": "oclif-dev readme && git add README.md"
   },
   "types": "lib/index.d.ts"
