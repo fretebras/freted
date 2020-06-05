@@ -22,7 +22,13 @@ export type Repository = {
 
 export type ServiceDefinition = {
   name: string;
+  host?: string;
   url: string;
   cloneUrl: string;
   dependencies?: string[];
+  credentials?: {
+    description: string;
+    user: string;
+    password: string;
+  }[];
 };

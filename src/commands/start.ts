@@ -3,10 +3,12 @@ import * as Listr from 'listr';
 import * as execa from 'execa';
 import * as fs from 'fs';
 import { Observable } from 'rxjs';
+import { terminal } from 'terminal-kit';
 import { ServiceDefinition } from '../types';
 import ManagerService from '../manager/service';
 import Resolver from '../manager/resolver';
 import { resolveRepositoryPath } from '../helpers/path';
+import HostsEditor from '../manager/hosts-editor';
 
 export default class Start extends Command {
   static description = 'start a service';
@@ -27,15 +29,18 @@ export default class Start extends Command {
 
   private manager = new ManagerService();
 
+  private hostsEditor = new HostsEditor();
+
   async run() {
     const { args: { service: serviceName } } = this.parse(Start);
-    const service = await this.resolver.resolveService(serviceName);
-
-    if (!service) {
-      this.error(`Service '${serviceName}' not found.`);
-    }
 
     try {
+      const service = await this.resolver.resolveService(serviceName);
+
+      if (!service) {
+        this.error(`Service '${serviceName}' not found.`);
+      }
+
       const dependencies = await this.resolver.resolveDependencies(service);
 
       const tasks = new Listr([
@@ -66,6 +71,12 @@ export default class Start extends Command {
               .then(() => resolve.complete())
               .catch((e) => resolve.error(e));
           }),
+        },
+        {
+          title: 'Add aliases to hosts file',
+          task: async () => {
+            await this.hostsEditor.addHosts([service, ...dependencies]);
+          },
         },
       ]);
 
@@ -100,6 +111,26 @@ export default class Start extends Command {
   }
 
   private printServicesSummary(services: ServiceDefinition[]): void {
-    console.log(services);
+    for (const service of services) {
+      terminal.green(`\n => ${service.name}: `);
+
+      if (service.host) {
+        terminal.defaultColor(service.host);
+      }
+
+      terminal('\n');
+
+      if (service.credentials) {
+        terminal.bold('    Credentials\n');
+
+        for (const credential of service.credentials) {
+          terminal.gray(`\n                ${credential.description}\n`);
+          terminal.bold('          User: ').defaultColor(`${credential.user}\n`);
+          terminal.bold('      Password: ').defaultColor(`${credential.password}\n`);
+        }
+      }
+    }
+
+    terminal.bold('\n\nYou\'re good to go!\n\n');
   }
 }

@@ -86,7 +86,17 @@ Besides that, the project must have a `docker-compose.yml` on the project root.
 
 Set the following configurations as needed (all are optional):
 
-## 1. Dependencies
+## Host
+
+Set the host on which the project can be accessed.
+
+```
+{
+  "host": "http://global.fretebras.local"
+}
+```
+
+## Dependencies
 
 Set the list of services that the service depends of. The service names must follow the same naming convention explained before.
 
@@ -98,7 +108,7 @@ Set the list of services that the service depends of. The service names must fol
 }
 ```
 
-## 2. Credentials
+## Credentials
 
 Set the default credentials that the developer can use to login in the system.
 
@@ -108,7 +118,7 @@ Set the default credentials that the developer can use to login in the system.
     {
       "description": "Active company VIP",
       "user": "fretebras",
-      "pass": "fretebras"
+      "password": "fretebras"
     }
   ]
 }

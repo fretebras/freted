@@ -2,6 +2,7 @@ import { Command } from '@oclif/command';
 import * as Listr from 'listr';
 import ManagerService from '../manager/service';
 import Resolver from '../manager/resolver';
+import HostsEditor from '../manager/hosts-editor';
 
 export default class Stop extends Command {
   static description = 'stop a service';
@@ -22,25 +23,38 @@ export default class Stop extends Command {
 
   private manager = new ManagerService();
 
+  private hostsEditor = new HostsEditor();
+
   async run() {
     const { args: { service: serviceName } } = this.parse(Stop);
-    const service = await this.resolver.resolveService(serviceName);
 
-    if (!service) {
-      this.error(`Service '${serviceName}' not found.`);
-    }
+    try {
+      const service = await this.resolver.resolveService(serviceName);
 
-    const dependencies = await this.resolver.resolveDependencies(service);
+      if (!service) {
+        this.error(`Service '${serviceName}' not found.`);
+      }
 
-    const tasks = new Listr([
-      {
-        title: 'Stop services',
-        task: async () => {
-          await this.manager.stop([service, ...dependencies]);
+      const dependencies = await this.resolver.resolveDependencies(service);
+
+      const tasks = new Listr([
+        {
+          title: 'Stop services',
+          task: async () => {
+            await this.manager.stop([service, ...dependencies]);
+          },
         },
-      },
-    ]);
+        {
+          title: 'Remove aliases from hosts file',
+          task: async () => {
+            await this.hostsEditor.removeHosts([service, ...dependencies]);
+          },
+        },
+      ]);
 
-    await tasks.run();
+      await tasks.run();
+    } catch (e) {
+      this.error(e.message);
+    }
   }
 }

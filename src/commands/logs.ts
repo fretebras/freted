@@ -13,11 +13,11 @@ export default class Monit extends Command {
     const { stdout } = await execa('docker', ['ps', '--format', '{{.Names}}']);
 
     const printLog = (container: string, data: Buffer) => {
-      terminal.green(`=== [stdout] ${container} ===\n`).white(`${data.toString()}\n`);
+      terminal.green(`=== [stdout] ${container} ===\n`).defaultColor(`${data.toString()}\n`);
     };
 
     const printError = (container: string, data: Buffer) => {
-      terminal.red(`=== [stderr] ${container} ===\n`).white(`${data.toString()}\n`);
+      terminal.red(`=== [stderr] ${container} ===\n`).defaultColor(`${data.toString()}\n`);
     };
 
     const listeners = [];
