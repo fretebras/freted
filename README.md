@@ -8,18 +8,31 @@ FreteBras development CLI
 [![Downloads/week](https://img.shields.io/npm/dw/freted.svg)](https://npmjs.org/package/freted)
 [![License](https://img.shields.io/npm/l/freted.svg)](https://gitlab.fretebras.com.br/dev/freted/blob/master/package.json)
 
+# About
+
+`$ freted` uses Docker and Git to manage environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
+
+# Requirements
+
+To use `freted` you need the following dependencies installed in your machine:
+- Docker (with docker-compose)
+- Git
+- Node
+
 <!-- toc -->
-* [Usage](#usage)
+* [About](#about)
+* [Requirements](#requirements)
+* [Getting started](#getting-started)
 * [Commands](#commands)
 <!-- tocstop -->
-# Usage
+# Getting started
 <!-- usage -->
 ```sh-session
 $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.0.1 darwin-x64 node-v12.17.0
+freted/0.0.2 darwin-x64 node-v12.17.0
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
@@ -31,7 +44,7 @@ USAGE
 * [`freted help [COMMAND]`](#freted-help-command)
 * [`freted inspect SERVICE`](#freted-inspect-service)
 * [`freted login`](#freted-login)
-* [`freted monit`](#freted-monit)
+* [`freted logs`](#freted-logs)
 * [`freted restart SERVICE`](#freted-restart-service)
 * [`freted start SERVICE`](#freted-start-service)
 * [`freted stop SERVICE`](#freted-stop-service)
@@ -81,16 +94,16 @@ EXAMPLE
   $ freted login
 ```
 
-## `freted monit`
+## `freted logs`
 
-monitor the services
+show services logs
 
 ```
 USAGE
-  $ freted monit
+  $ freted logs
 
 EXAMPLE
-  $ freted monit
+  $ freted logs
 ```
 
 ## `freted restart SERVICE`
