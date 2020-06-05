@@ -1,16 +1,17 @@
 {
-  "name": "fretectl",
+  "name": "freted",
   "description": "FreteBras development CLI",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "bin": {
-    "fretectl": "./bin/run"
+    "freted": "./bin/run"
   },
-  "bugs": "https://gitlab.fretebras.com.br/fretectl/-/issues",
+  "bugs": "https://gitlab.fretebras.com.br/dev/freted/-/issues",
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "@oclif/plugin-help": "^3",
     "axios": "^0.19.2",
+    "execa": "^4.0.2",
     "inquirer": "^7.1.0",
     "listr": "^0.14.3",
     "rxjs": "^6.5.5",
@@ -21,6 +22,7 @@
     "@oclif/test": "^1",
     "@types/axios": "^0.14.0",
     "@types/chai": "^4",
+    "@types/execa": "^2.0.0",
     "@types/inquirer": "^6.5.0",
     "@types/listr": "^0.14.2",
     "@types/mocha": "^5",
@@ -45,7 +47,7 @@
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://gitlab.fretebras.com.br/fretecli",
+  "homepage": "https://gitlab.fretebras.com.br/dev/freted",
   "keywords": [
     "oclif"
   ],
@@ -53,12 +55,12 @@
   "main": "lib/index.js",
   "oclif": {
     "commands": "./lib/commands",
-    "bin": "fretectl",
+    "bin": "freted",
     "plugins": [
       "@oclif/plugin-help"
     ]
   },
-  "repository": "https://gitlab.fretebras.com.br/fretecli",
+  "repository": "https://gitlab.fretebras.com.br/dev/freted",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "yarn lint",

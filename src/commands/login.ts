@@ -1,6 +1,6 @@
 import { Command } from '@oclif/command';
-import RepositoryService from '../repository/service';
 import * as inquirer from 'inquirer';
+import RepositoryService from '../repository/service';
 import Config from '../config';
 
 export default class Update extends Command {

@@ -11,13 +11,18 @@ export type ProviderRepository = {
   id: string;
   name: string;
   url: string;
-};
-
-export type RepositoryDefinition = {
-
+  cloneUrl: string;
+  defaultBranch: string;
 };
 
 export type Repository = {
   provider: ProviderConfig;
   repository: ProviderRepository;
+};
+
+export type ServiceDefinition = {
+  name: string;
+  url: string;
+  cloneUrl: string;
+  dependencies: string[];
 };

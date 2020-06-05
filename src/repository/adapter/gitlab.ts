@@ -1,11 +1,13 @@
 import Axios, { AxiosInstance } from 'axios';
 import { RepositoryAdapter } from './adapter';
-import { ProviderRepository, RepositoryDefinition } from '../../types';
+import { ProviderRepository, ServiceDefinition } from '../../types';
 
 type GitLabRepository = {
   id: string;
   path_with_namespace: string;
-  http_url_to_repo: string;
+  ssh_url_to_repo: string;
+  web_url: string;
+  default_branch: string;
 };
 
 type GitLabFile = {
@@ -48,7 +50,9 @@ export default class GitlabAdapter implements RepositoryAdapter {
     const repositories = data.map((repository) => ({
       id: repository.id,
       name: repository.path_with_namespace,
-      url: repository.http_url_to_repo,
+      url: repository.web_url,
+      cloneUrl: repository.ssh_url_to_repo,
+      defaultBranch: repository.default_branch,
     }));
 
     if (headers['x-next-page']?.length > 0) {
@@ -58,22 +62,29 @@ export default class GitlabAdapter implements RepositoryAdapter {
     return repositories;
   }
 
-  async readRepositoryDefinition(
+  async readServiceDefinition(
     token: string,
     repository: ProviderRepository,
-  ): Promise<RepositoryDefinition | undefined> {
+  ): Promise<ServiceDefinition | undefined> {
     try {
       const { data } = await this.client.get<GitLabFile>(
         `/api/v4/projects/${repository.id}/repository/files/composer.json`,
         {
           params: {
             private_token: token,
-            ref: 'master',
+            ref: repository.defaultBranch,
           },
         },
       );
 
-      return JSON.parse(Buffer.from(data.content, 'base64').toString()) as RepositoryDefinition;
+      const config = JSON.parse(Buffer.from(data.content, 'base64').toString());
+
+      return {
+        name: repository.name,
+        url: repository.url,
+        cloneUrl: repository.cloneUrl,
+        dependencies: config.dependencies || [],
+      };
     } catch (_) {
       return undefined;
     }

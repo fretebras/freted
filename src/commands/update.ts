@@ -3,7 +3,7 @@ import * as Listr from 'listr';
 import { Observable } from 'rxjs';
 import Config from '../config';
 import RepositoryService from '../repository/service';
-import { Repository, RepositoryDefinition } from '../types';
+import { Repository, ServiceDefinition } from '../types';
 
 export default class Update extends Command {
   static description = 'update repositories definitions';
@@ -12,18 +12,18 @@ export default class Update extends Command {
     '$ fretectl update',
   ];
 
-  private repositoryService = new RepositoryService();
+  private repository = new RepositoryService();
 
   async run() {
     const providers = Config.getProviders();
     const repositories: Repository[] = [];
-    const definitions: RepositoryDefinition[] = [];
+    const definitions: ServiceDefinition[] = [];
 
     const providersTasks: Listr.ListrTask[] = providers.map((provider) => ({
       title: `${provider.providerName} (${provider.name}) - Discover repositories`,
       concurrent: true,
       task: async () => {
-        const providerRepositories = await this.repositoryService.loadRepositories(provider);
+        const providerRepositories = await this.repository.loadRepositoriesFromProvider(provider);
         repositories.push(...providerRepositories);
       },
     }));
@@ -36,7 +36,7 @@ export default class Update extends Command {
 
           this.syncRepositories(repositories, ({ repository: { name } }, definition) => {
             done += 1;
-            observer.next(`(${done}/${repositories.length}) ${name} - ${definition}`);
+            observer.next(`(${done}/${repositories.length}) ${name}`);
 
             if (definition) definitions.push(definition);
           })
@@ -52,17 +52,16 @@ export default class Update extends Command {
 
     const tasks = new Listr(providersTasks.concat(processingTasks));
 
-    tasks.run().then(() => {
-      Config.setRepositories(definitions);
-    });
+    await tasks.run();
+    await this.repository.setServices(definitions);
   }
 
   private async syncRepositories(
     repositories: Repository[],
-    onSync: (repository: Repository, definition?: RepositoryDefinition) => void,
+    onSync: (repository: Repository, definition?: ServiceDefinition) => void,
   ): Promise<void> {
     for (const repository of repositories) {
-      const definition = await this.repositoryService.loadRepositoryDefinition(repository);
+      const definition = await this.repository.loadServiceDefinition(repository);
       onSync(repository, definition);
     }
   }

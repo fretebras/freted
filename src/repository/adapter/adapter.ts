@@ -1,4 +1,4 @@
-import { ProviderRepository, RepositoryDefinition } from '../../types';
+import { ProviderRepository, ServiceDefinition } from '../../types';
 
 export interface RepositoryAdapter {
 
@@ -6,7 +6,7 @@ export interface RepositoryAdapter {
 
   listRepositories: (token: string) => Promise<ProviderRepository[]>;
 
-  readRepositoryDefinition: (token: string, repository: ProviderRepository)
-  => Promise<RepositoryDefinition | undefined>;
+  readServiceDefinition: (token: string, repository: ProviderRepository)
+  => Promise<ServiceDefinition | undefined>;
 
 }
