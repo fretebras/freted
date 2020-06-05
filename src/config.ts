@@ -1,19 +1,23 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ProviderName, ProviderConfig, RepositoryDefinition } from './types';
+import { ProviderName, ProviderConfig, ServiceDefinition } from './types';
 
 type ConfigFile = {
   providers: ProviderConfig[];
-  definitions: RepositoryDefinition[];
+  services: ServiceDefinition[];
 };
 
 const defaultConfig: ConfigFile = {
   providers: [],
-  definitions: [],
+  services: [],
 };
 
 export default class Config {
+  static getWorkspacePath(): string {
+    return path.resolve(os.homedir(), 'Development');
+  }
+
   static getProviders(): ProviderConfig[] {
     return this.loadConfig().providers;
   }
@@ -31,12 +35,15 @@ export default class Config {
     this.writeConfig(config);
   }
 
-  static setRepositories(definitions: RepositoryDefinition[]): void {
+  static setServices(services: ServiceDefinition[]): void {
     const config = this.loadConfig();
-
-    config.definitions = definitions;
-
+    config.services = services;
     this.writeConfig(config);
+  }
+
+  static getServices(): ServiceDefinition[] {
+    const config = this.loadConfig();
+    return config.services;
   }
 
   private static loadConfig(): ConfigFile {

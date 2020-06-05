@@ -9,7 +9,7 @@ export default class Update extends Command {
   static description = 'update repositories definitions';
 
   static examples = [
-    '$ fretectl update',
+    '$ freted update',
   ];
 
   private repository = new RepositoryService();

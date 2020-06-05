@@ -13,7 +13,7 @@ export default class Inspect extends Command {
   ];
 
   static examples = [
-    '$ fretectl inspect web/site',
+    '$ freted inspect web/site',
   ];
 
   private repository = new RepositoryService();

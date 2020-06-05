@@ -7,10 +7,6 @@ export default class LocalStrategy implements RepositoryStrategy {
     Config.setServices(services);
   }
 
-  async getAllServices(): Promise<ServiceDefinition[]> {
-    return Config.getServices();
-  }
-
   async getService(name: string): Promise<ServiceDefinition | undefined> {
     const services = Config.getServices();
     return services.find((service) => service.name === name);

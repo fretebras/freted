@@ -12,10 +12,6 @@ export default class RepositoryService {
     this.strategy.setServices(services);
   }
 
-  async getAllServices(): Promise<ServiceDefinition[]> {
-    return this.strategy.getAllServices();
-  }
-
   async getService(name: string): Promise<ServiceDefinition | undefined> {
     return this.strategy.getService(name);
   }

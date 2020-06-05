@@ -7,7 +7,7 @@ export default class Update extends Command {
   static description = 'authenticate to supported providers';
 
   static examples = [
-    '$ fretectl login',
+    '$ freted login',
   ];
 
   private repositoryService = new RepositoryService();

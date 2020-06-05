@@ -24,5 +24,5 @@ export type ServiceDefinition = {
   name: string;
   url: string;
   cloneUrl: string;
-  dependencies: string[];
+  dependencies?: string[];
 };

@@ -68,7 +68,7 @@ export default class GitlabAdapter implements RepositoryAdapter {
   ): Promise<ServiceDefinition | undefined> {
     try {
       const { data } = await this.client.get<GitLabFile>(
-        `/api/v4/projects/${repository.id}/repository/files/composer.json`,
+        `/api/v4/projects/${repository.id}/repository/files/freted.json`,
         {
           params: {
             private_token: token,
@@ -83,7 +83,7 @@ export default class GitlabAdapter implements RepositoryAdapter {
         name: repository.name,
         url: repository.url,
         cloneUrl: repository.cloneUrl,
-        dependencies: config.dependencies || [],
+        ...config,
       };
     } catch (_) {
       return undefined;

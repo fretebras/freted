@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as execa from 'execa';
 import { ServiceDefinition } from '../types';
-import Config from '../config';
 import dependencies from './dependencies';
+import { resolveRepositoryPath } from '../helpers/path';
 
 export default class ManagerService {
   async start(services: ServiceDefinition[], onUpdate: (message: string) => void): Promise<void> {
@@ -53,8 +53,7 @@ export default class ManagerService {
   }
 
   private getComposeArgsForService(service: ServiceDefinition): string[] {
-    const workspacePath = Config.getWorkspacePath();
-    const projectPath = path.resolve(workspacePath, service.name);
+    const projectPath = resolveRepositoryPath(service);
     const composePath = path.resolve(projectPath, 'docker-compose.yml');
 
     return [

@@ -1,71 +1,60 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { ServiceDefinition } from '../types';
-import Config from '../config';
 import RepositoryService from '../repository/service';
+import { resolveRepositoryPath } from '../helpers/path';
+import resolvers from './resolvers';
 
 export default class Resolver {
   private repository = new RepositoryService();
 
-  async resolveDependencies(service: ServiceDefinition): Promise<ServiceDefinition[]> {
-    const services = await this.repository.getAllServices();
-    const [updatedService] = this.updateServicesWithLocalDefinitions([service]);
-
-    const serviceDependencies = services.filter((repository) => (
-      updatedService.dependencies.includes(repository.name)
-    ));
-
-    const unresolvedDependencies = updatedService.dependencies.filter((dependency) => (
-      !services.some((s) => s.name === dependency)
-    ));
-
-    const localDependencies = this.resolveLocalDependencies(unresolvedDependencies);
-
-    return this.updateServicesWithLocalDefinitions(
-      [updatedService, ...serviceDependencies, ...localDependencies],
-    );
-  }
-
-  private updateServicesWithLocalDefinitions(
-    services: ServiceDefinition[],
-  ): ServiceDefinition[] {
-    const workspacePath = Config.getWorkspacePath();
-
-    return services.map((service) => {
-      const configFilePath = path.resolve(workspacePath, service.name, 'freted.json');
-
-      if (!fs.existsSync(configFilePath)) return service;
-
-      const body = fs.readFileSync(configFilePath);
-      const localConfig = JSON.parse(body.toString()) as ServiceDefinition;
-
-      return { ...service, ...localConfig };
-    });
-  }
-
-  private resolveLocalDependencies(
-    dependencies: string[],
-  ): ServiceDefinition[] {
-    const workspacePath = Config.getWorkspacePath();
-    const resolved: ServiceDefinition[] = [];
-
-    for (const dependency of dependencies) {
-      const repositoryPath = path.resolve(workspacePath, dependency);
-      const configPath = path.resolve(repositoryPath, 'freted.json');
-
-      if (fs.existsSync(configPath)) {
-        const body = fs.readFileSync(configPath);
-        const config = JSON.parse(body.toString());
-
-        resolved.push({
-          name: dependency,
-          url: '',
-          cloneUrl: '',
-          dependencies: config.dependencies,
-        });
-      }
+  async resolveService(serviceName: string): Promise<ServiceDefinition | undefined> {
+    for (const resolver of resolvers) {
+      const service = await resolver.resolve(serviceName);
+      if (service) return this.updateServiceWithLocalDefinitions(service);
     }
 
-    return resolved;
+    return undefined;
+  }
+
+  async resolveDependencies(
+    service: ServiceDefinition,
+    dependencies: ServiceDefinition[] = [],
+  ): Promise<ServiceDefinition[]> {
+    if (!service.dependencies || service.dependencies.length === 0) return [];
+
+    for (const serviceName of service.dependencies) {
+      if (dependencies.some((d) => d.name === serviceName)) continue;
+
+      const dependency = await this.resolveService(serviceName);
+
+      if (dependency) {
+        dependencies.push(dependency);
+        continue;
+      }
+
+      throw new Error(`Couldn't resolve dependency '${serviceName}' of ${service.name}. Check if you have the right permissions`);
+    }
+
+    for (const dependency of dependencies) {
+      if (!dependency.dependencies || dependency.dependencies.length === 0) continue;
+      dependencies.push(...await this.resolveDependencies(dependency, dependencies));
+    }
+
+    return dependencies;
+  }
+
+  private updateServiceWithLocalDefinitions(
+    service: ServiceDefinition,
+  ): ServiceDefinition {
+    const projectPath = resolveRepositoryPath(service);
+    const configFilePath = path.resolve(projectPath, 'freted.json');
+
+    if (!fs.existsSync(configFilePath)) return service;
+
+    const body = fs.readFileSync(configFilePath);
+    const localConfig = JSON.parse(body.toString()) as ServiceDefinition;
+
+    return { ...service, ...localConfig };
   }
 }

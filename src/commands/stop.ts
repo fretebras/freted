@@ -16,7 +16,7 @@ export default class Stop extends Command {
   ];
 
   static examples = [
-    '$ fretectl stop web/site',
+    '$ freted stop web/site',
   ];
 
   private repository = new RepositoryService();

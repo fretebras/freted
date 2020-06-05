@@ -4,7 +4,7 @@ export default class Monit extends Command {
   static description = 'monitor the services';
 
   static examples = [
-    '$ fretectl monit',
+    '$ freted monit',
   ];
 
   async run() {

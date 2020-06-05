@@ -14,7 +14,7 @@ export default class Restart extends Command {
   ];
 
   static examples = [
-    '$ fretectl restart web/site',
+    '$ freted restart web/site',
   ];
 
   async run() {
