@@ -8,6 +8,15 @@ FreteBras development CLI
 [![Downloads/week](https://img.shields.io/npm/dw/freted.svg)](https://npmjs.org/package/freted)
 [![License](https://img.shields.io/npm/l/freted.svg)](https://gitlab.fretebras.com.br/dev/freted/blob/master/package.json)
 
+<!-- toc -->
+* [About](#about)
+* [Requirements](#requirements)
+* [Getting started](#getting-started)
+* [Configuring services](#configuring-services)
+* [CLI Usage](#cli-usage)
+* [Commands](#commands)
+<!-- tocstop -->
+
 # About
 
 `$ freted` uses Docker and Git to manage environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
@@ -19,20 +28,148 @@ To use `freted` you need the following dependencies installed in your machine:
 - Git
 - Node
 
-<!-- toc -->
-* [About](#about)
-* [Requirements](#requirements)
-* [Getting started](#getting-started)
-* [Commands](#commands)
-<!-- tocstop -->
 # Getting started
+
+To start using `freted`, follow those steps:
+
+## 1. Install `freted`
+
+```sh-session
+$ npm install -g freted
+```
+
+## 2. Authenticate with GitLab
+
+```sh-session
+$ freted login
+```
+
+## 3. Update repositories list
+
+Note: You should run this command periodically to keep the list updated.
+
+```sh-session
+$ freted update
+```
+
+## 3. Start a service
+
+Pass the service name as an argumento to the `start` command. The service name is the path of the repository.
+
+*For example, for the repository `https://gitlab.fretebras.com.br/web/global` the name is `web/global`.*
+
+If the repository don't exists locally, `freted` will clone in your workspace.
+
+*Your workspace will be at `~/Development`. The following directory three will b e used to organize the projects:*
+
+```
+~/Development
+  gitlab.fretebras.com.br
+    web
+      global
+      fretebras-central
+    inovacao
+      website-2019
+```
+
+If you are working on a new project and it doesn't have a repository yet, `freted` will try to resolve the local directory of the project using the above directory three.
+
+```sh-session
+$ freted start web/global
+```
+
+# Configuring services
+
+In order to configure a project to run using `freted`, create a file in the project root named `freted.json` with a valid JSON content (like `{}`).
+
+Besides that, the project must have a `docker-compose.yml` on the project root.
+
+Set the following configurations as needed (all are optional):
+
+## 1. Dependencies
+
+Set the list of services that the service depends of. The service names must follow the same naming convention explained before.
+
+```
+{
+  "dependencies": [
+    "web/database"
+  ]
+}
+```
+
+## 2. Credentials
+
+Set the default credentials that the developer can use to login in the system.
+
+```
+{
+  "credentials": [
+    {
+      "description": "Active company VIP",
+      "user": "fretebras",
+      "pass": "fretebras"
+    }
+  ]
+}
+```
+
+## 3. HTTP entrypoint
+
+`freted` uses Traefik to facilitate the organization and communication between all services. The Traefik container is automatically managed by `freted`.
+
+If your service can be accessed through HTTP, edit the `docker-compose.yml` and set the following properties:
+
+- Set any Traefik supported labels, for example:
+```
+labels:
+  - traefik.http.routers.global.rule=Host(`global.fretebras.local`)
+```
+- Connect the service container to the Traefik network and configure the host as an alias:
+```
+networks:
+  default:
+  freted-network:
+    aliases:
+      - global.fretebras.local
+```
+- Reference the Traefik network to make it available to the local services:
+```
+networks:
+  freted-network:
+    external: true
+```
+
+*Note: By default, Traefik will use `EXPOSED` port defined on the project's `Dockerfile` to route the requests.*
+
+A full example of the `docker-compose.yml` after the changes:
+```
+version: '3'
+
+services:
+  app:
+    build: .
+    networks:
+      default:
+      freted-network:
+        aliases:
+          - global.fretebras.local
+    labels:
+      - traefik.http.routers.global.rule=Host(`global.fretebras.local`)
+
+networks:
+  freted-network:
+    external: true
+```
+
+# CLI Usage
 <!-- usage -->
 ```sh-session
 $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.0.2 darwin-x64 node-v12.17.0
+freted/0.0.3 darwin-x64 node-v12.17.0
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
