@@ -179,7 +179,7 @@ $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.0.3 darwin-x64 node-v12.17.0
+freted/0.0.4 darwin-x64 node-v12.17.0
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
