@@ -1,7 +1,6 @@
 import { Command } from '@oclif/command';
 import * as Listr from 'listr';
 import ManagerService from '../manager/service';
-import RepositoryService from '../repository/service';
 import Resolver from '../manager/resolver';
 
 export default class Stop extends Command {
@@ -19,27 +18,25 @@ export default class Stop extends Command {
     '$ freted stop web/site',
   ];
 
-  private repository = new RepositoryService();
-
   private resolver = new Resolver();
 
   private manager = new ManagerService();
 
   async run() {
     const { args: { service: serviceName } } = this.parse(Stop);
-    const service = await this.repository.getService(serviceName);
+    const service = await this.resolver.resolveService(serviceName);
 
     if (!service) {
       this.error(`Service '${serviceName}' not found.`);
     }
 
-    const serviceAndDependenciesList = await this.resolver.resolveDependencies(service);
+    const dependencies = await this.resolver.resolveDependencies(service);
 
     const tasks = new Listr([
       {
         title: 'Stop services',
         task: async () => {
-          await this.manager.stop(serviceAndDependenciesList);
+          await this.manager.stop([service, ...dependencies]);
         },
       },
     ]);

@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
 import { ServiceDefinition } from '../types';
 import ManagerService from '../manager/service';
 import Resolver from '../manager/resolver';
-import RepositoryService from '../repository/service';
 import { resolveRepositoryPath } from '../helpers/path';
 
 export default class Start extends Command {
@@ -23,8 +22,6 @@ export default class Start extends Command {
   static examples = [
     '$ freted start web/site',
   ];
-
-  private repository = new RepositoryService();
 
   private resolver = new Resolver();
 
