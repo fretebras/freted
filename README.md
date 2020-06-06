@@ -60,7 +60,7 @@ Pass the service name as an argumento to the `start` command. The service name i
 
 If the repository don't exists locally, `freted` will clone in your workspace.
 
-*Your workspace will be at `~/Development`. The following directory three will b e used to organize the projects:*
+*Your workspace will be at `~/Development`. The following directory tree will b e used to organize the projects:*
 
 ```
 ~/Development
@@ -72,7 +72,7 @@ If the repository don't exists locally, `freted` will clone in your workspace.
       website-2019
 ```
 
-If you are working on a new project and it doesn't have a repository yet, `freted` will try to resolve the local directory of the project using the above directory three.
+If you are working on a new project and it doesn't have a repository yet, `freted` will try to resolve the local directory of the project using the above directory tree.
 
 ```sh-session
 $ freted start web/global
