@@ -179,7 +179,7 @@ $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.0.4 darwin-x64 node-v12.17.0
+freted/0.0.5 darwin-x64 node-v12.17.0
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
@@ -278,6 +278,10 @@ USAGE
 
 ARGUMENTS
   SERVICE  name of the service to start
+
+OPTIONS
+  --no-dependencies           don't start service dependencies
+  --no-optional-dependencies  don't start service optional dependencies
 
 EXAMPLE
   $ freted start web/site
