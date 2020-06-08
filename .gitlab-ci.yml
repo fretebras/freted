@@ -1,0 +1,29 @@
+image: node:12-alpine
+
+stages:
+  - Lint
+  - Test
+  - Publish
+
+build:
+  stage: Lint
+  before_script:
+    - yarn
+  script:
+    - yarn lint
+
+lint:
+  stage: Test
+  before_script:
+    - yarn
+  script:
+    - yarn test
+
+publish:
+  stage: Publish
+  before_script:
+    - yarn
+  script:
+    - echo 'TODO'
+  only:
+    - master
