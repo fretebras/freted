@@ -16,11 +16,14 @@ export default class Resolver {
 
   async resolveDependencies(
     service: ServiceDefinition,
+    includeOptionals: boolean,
     dependencies: ServiceDefinition[] = [],
   ): Promise<ServiceDefinition[]> {
-    if (!service.dependencies || service.dependencies.length === 0) return [];
+    const serviceDependencies = this.getServiceDependencyList(service, includeOptionals);
 
-    for (const serviceName of service.dependencies) {
+    if (serviceDependencies.length === 0) return [];
+
+    for (const serviceName of serviceDependencies) {
       if (dependencies.some((d) => d.name === serviceName)) continue;
 
       const dependency = await this.resolveService(serviceName);
@@ -34,11 +37,27 @@ export default class Resolver {
     }
 
     for (const dependency of dependencies) {
-      if (!dependency.dependencies || dependency.dependencies.length === 0) continue;
-      dependencies.push(...await this.resolveDependencies(dependency, dependencies));
+      const dependencyDependencies = this.getServiceDependencyList(service, includeOptionals);
+      if (dependencyDependencies.length === 0) continue;
+      if (dependencies.every((d) => dependencyDependencies.includes(d.name))) continue;
+
+      dependencies.push(
+        ...await this.resolveDependencies(dependency, includeOptionals, dependencies),
+      );
     }
 
     return dependencies;
+  }
+
+  private getServiceDependencyList(
+    service: ServiceDefinition,
+    includeOptionals: boolean,
+  ): string[] {
+    if (!includeOptionals) {
+      return service.dependencies || [];
+    }
+
+    return [...(service.dependencies || []), ...(service.optionalDependencies || [])];
   }
 
   private updateServiceWithLocalDefinitions(

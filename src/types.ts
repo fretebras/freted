@@ -26,6 +26,7 @@ export type ServiceDefinition = {
   url: string;
   cloneUrl: string;
   dependencies?: string[];
+  optionalDependencies?: string[];
   credentials?: {
     description: string;
     user: string;

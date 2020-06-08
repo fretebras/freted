@@ -1,4 +1,4 @@
-import { Command } from '@oclif/command';
+import { Command, flags } from '@oclif/command';
 import * as Listr from 'listr';
 import * as execa from 'execa';
 import * as fs from 'fs';
@@ -21,6 +21,19 @@ export default class Start extends Command {
     },
   ];
 
+  static flags = {
+    'no-dependencies': flags.boolean({
+      description: 'don\'t start service dependencies',
+      required: false,
+      default: false,
+    }),
+    'no-optional-dependencies': flags.boolean({
+      description: 'don\'t start service optional dependencies',
+      required: false,
+      default: false,
+    }),
+  };
+
   static examples = [
     '$ freted start web/site',
   ];
@@ -32,7 +45,7 @@ export default class Start extends Command {
   private hostsEditor = new HostsEditor();
 
   async run() {
-    const { args: { service: serviceName } } = this.parse(Start);
+    const { args: { service: serviceName }, flags: startFlags } = this.parse(Start);
 
     try {
       const service = await this.resolver.resolveService(serviceName);
@@ -41,7 +54,7 @@ export default class Start extends Command {
         this.error(`Service '${serviceName}' not found.`);
       }
 
-      const dependencies = await this.resolver.resolveDependencies(service);
+      const dependencies = await this.resolveDependencies(service, startFlags);
 
       const tasks = new Listr([
         {
@@ -86,6 +99,18 @@ export default class Start extends Command {
     } catch (e) {
       this.error(e.message);
     }
+  }
+
+  private async resolveDependencies(
+    service: ServiceDefinition,
+    startFlags: { [ name: string ]: boolean },
+  ): Promise<ServiceDefinition[]> {
+    if (startFlags['no-dependencies']) return [];
+
+    return this.resolver.resolveDependencies(
+      service,
+      !startFlags['no-optional-dependencies'],
+    );
   }
 
   private getRepositoriesToClone(repositories: ServiceDefinition[]): ServiceDefinition[] {
