@@ -1,8 +1,8 @@
-import RepositoryStrategy from './strategy';
+import RegistryStrategy from './strategy';
 import { ServiceDefinition } from '../../types';
 import Config from '../../config';
 
-export default class LocalStrategy implements RepositoryStrategy {
+export default class LocalStrategy implements RegistryStrategy {
   async setServices(services: ServiceDefinition[]): Promise<void> {
     Config.setServices(services);
   }

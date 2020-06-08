@@ -2,7 +2,7 @@ import { Command } from '@oclif/command';
 import * as Listr from 'listr';
 import { Observable } from 'rxjs';
 import Config from '../config';
-import RepositoryService from '../repository/service';
+import RegistryService from '../registry/service';
 import { Repository, ServiceDefinition } from '../types';
 
 export default class Update extends Command {
@@ -12,7 +12,7 @@ export default class Update extends Command {
     '$ freted update',
   ];
 
-  private repository = new RepositoryService();
+  private registry = new RegistryService();
 
   async run() {
     const providers = Config.getProviders();
@@ -23,7 +23,7 @@ export default class Update extends Command {
       title: `${provider.providerName} (${provider.name}) - Discover repositories`,
       concurrent: true,
       task: async () => {
-        const providerRepositories = await this.repository.loadRepositoriesFromProvider(provider);
+        const providerRepositories = await this.registry.loadRepositoriesFromProvider(provider);
         repositories.push(...providerRepositories);
       },
     }));
@@ -53,7 +53,7 @@ export default class Update extends Command {
     const tasks = new Listr(providersTasks.concat(processingTasks));
 
     await tasks.run();
-    await this.repository.setServices(definitions);
+    await this.registry.setServices(definitions);
   }
 
   private async syncRepositories(
@@ -61,7 +61,7 @@ export default class Update extends Command {
     onSync: (repository: Repository, definition?: ServiceDefinition) => void,
   ): Promise<void> {
     for (const repository of repositories) {
-      const definition = await this.repository.loadServiceDefinition(repository);
+      const definition = await this.registry.loadServiceDefinition(repository);
       onSync(repository, definition);
     }
   }

@@ -1,7 +1,7 @@
-import RepositoryResolver from './repository';
+import RegistryResolver from './registry';
 import LocalResolver from './local';
 
 export default [
-  new RepositoryResolver(),
+  new RegistryResolver(),
   new LocalResolver(),
 ];

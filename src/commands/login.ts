@@ -1,6 +1,6 @@
 import { Command } from '@oclif/command';
 import * as inquirer from 'inquirer';
-import RepositoryService from '../repository/service';
+import RegistryService from '../registry/service';
 import Config from '../config';
 
 export default class Update extends Command {
@@ -10,7 +10,7 @@ export default class Update extends Command {
     '$ freted login',
   ];
 
-  private repositoryService = new RepositoryService();
+  private registry = new RegistryService();
 
   async run() {
     const answers = await inquirer.prompt([
@@ -41,7 +41,7 @@ export default class Update extends Command {
           if (!partialAnswers) return false;
           const { provider } = partialAnswers;
 
-          const valid = await this.repositoryService.validateToken(
+          const valid = await this.registry.validateToken(
             provider,
             token,
           );

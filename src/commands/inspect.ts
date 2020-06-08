@@ -1,5 +1,5 @@
 import { Command } from '@oclif/command';
-import RepositoryService from '../repository/service';
+import RegistryService from '../registry/service';
 
 export default class Inspect extends Command {
   static description = 'inspect a service';
@@ -16,11 +16,11 @@ export default class Inspect extends Command {
     '$ freted inspect web/site',
   ];
 
-  private repository = new RepositoryService();
+  private registry = new RegistryService();
 
   async run() {
     const { args: { service: serviceName } } = this.parse(Inspect);
-    const service = await this.repository.getService(serviceName);
+    const service = await this.registry.getService(serviceName);
 
     if (!service) {
       this.error(`Service '${serviceName}' not found.`);

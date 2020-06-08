@@ -1,13 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { ServiceDefinition } from '../types';
-import RepositoryService from '../repository/service';
 import { resolveRepositoryPath } from '../helpers/path';
 import resolvers from './resolvers';
 
 export default class Resolver {
-  private repository = new RepositoryService();
-
   async resolveService(serviceName: string): Promise<ServiceDefinition | undefined> {
     for (const resolver of resolvers) {
       const service = await resolver.resolve(serviceName);

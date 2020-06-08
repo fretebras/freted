@@ -3,10 +3,10 @@ import {
   ProviderConfig, ProviderName, Repository, ServiceDefinition,
 } from '../types';
 import strategyFactory from './strategy';
-import RepositoryStrategy from './strategy/strategy';
+import RegistryStrategy from './strategy/strategy';
 
-export default class RepositoryService {
-  private strategy: RepositoryStrategy = strategyFactory();
+export default class RegistryService {
+  private strategy: RegistryStrategy = strategyFactory();
 
   async setServices(services: ServiceDefinition[]): Promise<void> {
     this.strategy.setServices(services);
