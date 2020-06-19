@@ -17,7 +17,8 @@ lint:
 
 test:
   stage: Test
-  paths:
+  cache:
+    paths:
     - node_modules/
   before_script:
     - yarn
