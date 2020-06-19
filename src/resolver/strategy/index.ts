@@ -1,7 +1,7 @@
-import RegistryResolver from './registry';
+import RemoteResolver from './remote';
 import LocalResolver from './local';
 
 export default [
-  new RegistryResolver(),
   new LocalResolver(),
+  new RemoteResolver(),
 ];

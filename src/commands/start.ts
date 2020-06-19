@@ -1,14 +1,12 @@
 import { Command, flags } from '@oclif/command';
 import * as Listr from 'listr';
 import * as execa from 'execa';
-import * as fs from 'fs';
 import { Observable } from 'rxjs';
-import { terminal } from 'terminal-kit';
 import { ServiceDefinition } from '../types';
-import ManagerService from '../manager/service';
-import Resolver from '../manager/resolver';
-import { resolveRepositoryPath } from '../helpers/path';
+import ManagerService from '../manager';
+import Resolver from '../resolver';
 import HostsEditor from '../manager/hosts-editor';
+import { printServices } from '../helpers/display';
 
 export default class Start extends Command {
   static description = 'start a service';
@@ -22,6 +20,11 @@ export default class Start extends Command {
   ];
 
   static flags = {
+    build: flags.boolean({
+      description: 'rebuild containers before start',
+      required: false,
+      default: false,
+    }),
     'no-dependencies': flags.boolean({
       description: 'don\'t start service dependencies',
       required: false,
@@ -60,7 +63,7 @@ export default class Start extends Command {
         {
           title: 'Clone repositories',
           task: (_, task) => new Observable((resolve) => {
-            const repositoriesToClone = this.getRepositoriesToClone(dependencies);
+            const repositoriesToClone = this.getRepositoriesToClone([service, ...dependencies]);
 
             if (repositoriesToClone.length === 0) {
               task.skip('All repositories are already cloned.');
@@ -80,7 +83,11 @@ export default class Start extends Command {
         {
           title: 'Start services',
           task: () => new Observable((resolve) => {
-            this.manager.start([service, ...dependencies], (message) => resolve.next(message))
+            this.manager.start(
+              [service, ...dependencies],
+              startFlags.build,
+              (message) => resolve.next(message),
+            )
               .then(() => resolve.complete())
               .catch((e) => resolve.error(e));
           }),
@@ -88,14 +95,14 @@ export default class Start extends Command {
         {
           title: 'Add aliases to hosts file',
           task: async () => {
-            await this.hostsEditor.addHosts([service, ...dependencies]);
+            // await this.hostsEditor.addHosts([service, ...dependencies]);
           },
         },
       ]);
 
       await tasks.run();
 
-      this.printServicesSummary([service, ...dependencies]);
+      printServices([service, ...dependencies]);
     } catch (e) {
       this.error(e.message);
     }
@@ -113,49 +120,24 @@ export default class Start extends Command {
     );
   }
 
-  private getRepositoriesToClone(repositories: ServiceDefinition[]): ServiceDefinition[] {
-    return repositories.filter((repository) => {
-      if (!repository.name) return false;
-      return !fs.existsSync(resolveRepositoryPath(repository));
-    });
+  private getRepositoriesToClone(services: ServiceDefinition[]): ServiceDefinition[] {
+    return services.filter((service) => service.repository);
   }
 
   private async cloneRepositories(
     services: ServiceDefinition[],
     onClone: (repository: ServiceDefinition) => void,
   ): Promise<void> {
-    for (const repository of services) {
-      onClone(repository);
+    for (const service of services) {
+      if (!service.repository) continue;
+
+      onClone(service);
 
       await execa('git', [
         'clone',
-        repository.cloneUrl,
-        resolveRepositoryPath(repository),
+        service.repository.cloneUrl,
+        service.localPath,
       ]);
     }
-  }
-
-  private printServicesSummary(services: ServiceDefinition[]): void {
-    for (const service of services) {
-      terminal.green(`\n => ${service.name}: `);
-
-      if (service.host) {
-        terminal.defaultColor(service.host);
-      }
-
-      terminal('\n');
-
-      if (service.credentials) {
-        terminal.bold('    Credentials\n');
-
-        for (const credential of service.credentials) {
-          terminal.gray(`\n                ${credential.description}\n`);
-          terminal.bold('          User: ').defaultColor(`${credential.user}\n`);
-          terminal.bold('      Password: ').defaultColor(`${credential.password}\n`);
-        }
-      }
-    }
-
-    terminal.bold('\n\nYou\'re good to go!\n\n');
   }
 }
