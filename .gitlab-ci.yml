@@ -5,15 +5,20 @@ stages:
   - Test
   - Publish
 
-build:
+lint:
   stage: Lint
+  cache:
+    paths:
+    - node_modules/
   before_script:
     - yarn
   script:
     - yarn lint
 
-lint:
+test:
   stage: Test
+  paths:
+    - node_modules/
   before_script:
     - yarn
   script:

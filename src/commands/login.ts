@@ -1,7 +1,7 @@
 import { Command } from '@oclif/command';
 import * as inquirer from 'inquirer';
-import RegistryService from '../registry/service';
 import Config from '../config';
+import AdapterFactory from '../adapter/factory';
 
 export default class Update extends Command {
   static description = 'authenticate to supported providers';
@@ -9,8 +9,6 @@ export default class Update extends Command {
   static examples = [
     '$ freted login',
   ];
-
-  private registry = new RegistryService();
 
   async run() {
     const answers = await inquirer.prompt([
@@ -39,12 +37,9 @@ export default class Update extends Command {
         type: 'password',
         validate: async (token, partialAnswers) => {
           if (!partialAnswers) return false;
-          const { provider } = partialAnswers;
-
-          const valid = await this.registry.validateToken(
-            provider,
-            token,
-          );
+          const { provider, url } = partialAnswers;
+          const adapter = AdapterFactory.make(provider, url);
+          const valid = await adapter.authenticate(token);
 
           return valid || 'Invalid token. Check the token and if you granted the right roles to the token.';
         },

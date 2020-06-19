@@ -1,7 +1,7 @@
 import { Command } from '@oclif/command';
 import * as Listr from 'listr';
-import ManagerService from '../manager/service';
-import Resolver from '../manager/resolver';
+import ManagerService from '../manager';
+import Resolver from '../resolver';
 import HostsEditor from '../manager/hosts-editor';
 
 export default class Stop extends Command {
@@ -35,7 +35,7 @@ export default class Stop extends Command {
         this.error(`Service '${serviceName}' not found.`);
       }
 
-      const dependencies = await this.resolver.resolveDependencies(service);
+      const dependencies = await this.resolver.resolveDependencies(service, true);
 
       const tasks = new Listr([
         {
@@ -47,7 +47,7 @@ export default class Stop extends Command {
         {
           title: 'Remove aliases from hosts file',
           task: async () => {
-            await this.hostsEditor.removeHosts([service, ...dependencies]);
+            // await this.hostsEditor.removeHosts([service, ...dependencies]);
           },
         },
       ]);

@@ -1,23 +1,31 @@
 import * as path from 'path';
 import * as execa from 'execa';
 import { ServiceDefinition } from '../types';
-import dependencies from './dependencies';
-import { resolveRepositoryPath } from '../helpers/path';
+import dependencies from './core-dependencies';
+import ComposerEditor from './composer-editor';
 
 export default class ManagerService {
-  async start(services: ServiceDefinition[], onUpdate: (message: string) => void): Promise<void> {
+  private composerEditor = new ComposerEditor();
+
+  async start(
+    services: ServiceDefinition[],
+    rebuild: boolean,
+    onUpdate: (message: string) => void,
+  ): Promise<void> {
     await this.startDependencies();
 
     for (const service of services) {
-      const subprocess = execa('docker-compose', [
+      const args = [
         ...this.getComposeArgsForService(service),
         'up',
         '--detach',
         '--no-color',
         '--remove-orphans',
-        '--build',
-      ]);
+      ];
 
+      if (rebuild) args.push('--build');
+
+      const subprocess = execa('docker-compose', args);
       subprocess.stdout.on('data', (data) => onUpdate(data.toString()));
 
       await subprocess;
@@ -53,14 +61,13 @@ export default class ManagerService {
   }
 
   private getComposeArgsForService(service: ServiceDefinition): string[] {
-    const projectPath = resolveRepositoryPath(service);
-    const composePath = path.resolve(projectPath, 'docker-compose.yml');
+    const composePath = path.resolve(service.localPath, 'docker-compose.yml');
 
     return [
       '--no-ansi',
       '--project-name', service.name.replace(/\//g, '-'),
-      '--project-directory', projectPath,
-      '-f', composePath,
+      '--project-directory', service.localPath,
+      '-f', this.composerEditor.modify(composePath, service),
     ];
   }
 }

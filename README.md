@@ -10,6 +10,7 @@ FreteBras development CLI
 
 <!-- toc -->
 * [About](#about)
+* [Technology](#technology)
 * [Requirements](#requirements)
 * [Getting started](#getting-started)
 * [Configuring services](#configuring-services)
@@ -20,6 +21,12 @@ FreteBras development CLI
 # About
 
 `$ freted` uses Docker and Git to manage environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
+
+# Technology
+
+- Node
+- Oclif
+- TypeScript
 
 # Requirements
 
@@ -34,8 +41,20 @@ To start using `freted`, follow those steps:
 
 ## 1. Install `freted`
 
+### Linux and Mac
+
+Clone the project and install npm dependencies:
+
 ```sh-session
-$ npm install -g freted
+$ git clone git@gitlab.fretebras.com.br:dev/freted.git ~/Development/gitlab.fretebras.com.br/dev/freted
+$ cd ~/Development/gitlab.fretebras.com.br/dev/freted
+$ yarn
+```
+
+Create an alias to use the cli from anywhere (add to your `.bashrc`, `.zshrc`, etc):
+
+```
+alias freted=~/Development/gitlab.fretebras.com.br/dev/freted/bin/run
 ```
 
 ## 2. Authenticate with GitLab
@@ -44,23 +63,15 @@ $ npm install -g freted
 $ freted login
 ```
 
-## 3. Update repositories list
-
-Note: You should run this command periodically to keep the list updated.
-
-```sh-session
-$ freted update
-```
-
 ## 3. Start a service
 
-Pass the service name as an argumento to the `start` command. The service name is the path of the repository.
+Enter the service name as an argument to the `start` command. The service name is the path of the repository.
 
 *For example, for the repository `https://gitlab.fretebras.com.br/web/global` the name is `web/global`.*
 
 If the repository don't exists locally, `freted` will clone in your workspace.
 
-*Your workspace will be at `~/Development`. The following directory tree will b e used to organize the projects:*
+*Your workspace will be at `~/Development`. The following directory tree will be used to organize the projects:*
 
 ```
 ~/Development
@@ -80,97 +91,47 @@ $ freted start web/global
 
 # Configuring services
 
-In order to configure a project to run using `freted`, create a file in the project root named `freted.json` with a valid JSON content (like `{}`).
+Any repositories that have a `docker-compose.yml` can be started using `freted`.
 
-Besides that, the project must have a `docker-compose.yml` on the project root.
-
-Set the following configurations as needed (all are optional):
-
-## Host
-
-Set the host on which the project can be accessed.
-
-```
-{
-  "host": "http://global.fretebras.local"
-}
-```
+To use additional features of `freted`, the following configurations can be made:
 
 ## Dependencies
 
-Set the list of services that the service depends of. The service names must follow the same naming convention explained before.
+`freted` is also a dependency manager. If you have a service (like a SPA) that depends on another (like an API), you can declare this dependency on the project's `README.md`:
 
 ```
-{
-  "dependencies": [
-    "web/database"
-  ]
-}
+<!-- dependencies -->
+[dev/database](https://gitlab.fretebras.com.br)
+<!-- dependenciesstop -->
 ```
 
-## Credentials
+All links inside the `dependencies` section will be considered as dependencies and will be automatically started.  
+*Note: At this moment, only the link label will be used to resolve the dependencies. For this reason, the label must be the service name following the same naming convention presented above.*
 
-Set the default credentials that the developer can use to login in the system.
+## Credentials and instructions
+
+The `welcome` section will be rendered on the terminal after the start of the service. It's a good place to put default credentials and quick notes for the developers.
 
 ```
-{
-  "credentials": [
-    {
-      "description": "Active company VIP",
-      "user": "fretebras",
-      "password": "fretebras"
-    }
-  ]
-}
+<!-- welcome -->
+Use those credentials to login:
+Active company: user@company.com - 123456
+Suspended company: user-suspended@company.com - 123456
+<!-- welcomestop -->
 ```
 
 ## 3. HTTP entrypoint
 
 `freted` uses Traefik to facilitate the organization and communication between all services. The Traefik container is automatically managed by `freted`.
 
-If your service can be accessed through HTTP, edit the `docker-compose.yml` and set the following properties:
+If your service can be accessed through HTTP, edit the `docker-compose.yml` and set the following label to the container that has a HTTP server:
 
-- Set any Traefik supported labels, for example:
 ```
 labels:
-  - traefik.http.routers.global.rule=Host(`global.fretebras.local`)
-```
-- Connect the service container to the Traefik network and configure the host as an alias:
-```
-networks:
-  default:
-  freted-network:
-    aliases:
-      - global.fretebras.local
-```
-- Reference the Traefik network to make it available to the local services:
-```
-networks:
-  freted-network:
-    external: true
+  - freted.host=global.fretebras.local
 ```
 
-*Note: By default, Traefik will use `EXPOSED` port defined on the project's `Dockerfile` to route the requests.*
-
-A full example of the `docker-compose.yml` after the changes:
-```
-version: '3'
-
-services:
-  app:
-    build: .
-    networks:
-      default:
-      freted-network:
-        aliases:
-          - global.fretebras.local
-    labels:
-      - traefik.http.routers.global.rule=Host(`global.fretebras.local`)
-
-networks:
-  freted-network:
-    external: true
-```
+*Note: By default, Traefik will use the `EXPOSED` port defined on the project's `Dockerfile` to route the requests.*
 
 # CLI Usage
 <!-- usage -->
@@ -179,7 +140,7 @@ $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.0.5 darwin-x64 node-v12.17.0
+freted/0.0.6 darwin-x64 node-v12.17.0
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
@@ -195,7 +156,6 @@ USAGE
 * [`freted restart SERVICE`](#freted-restart-service)
 * [`freted start SERVICE`](#freted-start-service)
 * [`freted stop SERVICE`](#freted-stop-service)
-* [`freted update`](#freted-update)
 
 ## `freted help [COMMAND]`
 
@@ -280,6 +240,7 @@ ARGUMENTS
   SERVICE  name of the service to start
 
 OPTIONS
+  --build                     rebuild containers before start
   --no-dependencies           don't start service dependencies
   --no-optional-dependencies  don't start service optional dependencies
 
@@ -300,17 +261,5 @@ ARGUMENTS
 
 EXAMPLE
   $ freted stop web/site
-```
-
-## `freted update`
-
-update repositories definitions
-
-```
-USAGE
-  $ freted update
-
-EXAMPLE
-  $ freted update
 ```
 <!-- commandsstop -->
