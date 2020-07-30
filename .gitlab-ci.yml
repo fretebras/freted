@@ -1,0 +1,41 @@
+image: node:12-alpine
+
+stages:
+  - Lint
+  - Test
+  - Publish
+
+lint:
+  stage: Lint
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+    - node_modules/
+  before_script:
+    - yarn
+  script:
+    - yarn lint
+
+test:
+  stage: Test
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+    - node_modules/
+  before_script:
+    - yarn
+  script:
+    - yarn test
+
+publish:
+  stage: Publish
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+    - node_modules/
+  before_script:
+    - yarn
+  script:
+    - echo 'TODO'
+  only:
+    - master

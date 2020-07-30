@@ -1,0 +1,81 @@
+{
+  "name": "freted",
+  "description": "FreteBras development CLI",
+  "version": "0.0.6",
+  "bin": {
+    "freted": "./bin/run"
+  },
+  "bugs": "https://gitlab.fretebras.com.br/dev/freted/-/issues",
+  "dependencies": {
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/plugin-help": "^3",
+    "axios": "^0.19.2",
+    "execa": "^4.0.2",
+    "inquirer": "^7.1.0",
+    "listr": "^0.14.3",
+    "marked": "^1.1.0",
+    "marked-terminal": "^4.1.0",
+    "rxjs": "^6.5.5",
+    "sudo-prompt": "^9.2.1",
+    "terminal-kit": "^1.35.3",
+    "tslib": "^1",
+    "yaml": "^1.10.0"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/test": "^1",
+    "@types/axios": "^0.14.0",
+    "@types/chai": "^4",
+    "@types/execa": "^2.0.0",
+    "@types/inquirer": "^6.5.0",
+    "@types/listr": "^0.14.2",
+    "@types/marked": "^0.7.4",
+    "@types/marked-terminal": "^3.1.1",
+    "@types/mocha": "^5",
+    "@types/node": "^10",
+    "@types/terminal-kit": "^1.28.2",
+    "@types/yaml": "^1.9.7",
+    "@typescript-eslint/eslint-plugin": "^3.1.0",
+    "chai": "^4",
+    "eslint": "^5.13",
+    "eslint-config-airbnb-typescript": "^8.0.2",
+    "eslint-plugin-import": "^2.20.2",
+    "globby": "^10",
+    "mocha": "^5",
+    "nyc": "^14",
+    "ts-node": "^8",
+    "typescript": "^3.3"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://gitlab.fretebras.com.br/dev/freted",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "UNLICENSED",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "freted",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "https://gitlab.fretebras.com.br/dev/freted",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "lint": "eslint ./src --ext .ts",
+    "version": "oclif-dev readme && git add README.md"
+  },
+  "types": "lib/index.d.ts"
+}
