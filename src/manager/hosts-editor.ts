@@ -27,12 +27,22 @@ export default class HostsEditor {
   }
 
   private getHostsList(services: ServiceDefinition[]): string[] {
-    return services.filter((s) => s.host).map((s) => {
-      try {
-        return new URL(s.host!).host;
-      } catch (_) {
-        return s.host!;
-      }
-    });
+    return services.filter((service) => service.routes)
+      .map<string[]>((serviceWithRoutes) => Object.values(serviceWithRoutes.routes!)
+      .reduce((values, nextValue) => {
+        values.push(...nextValue);
+        return values;
+      }, []))
+      .reduce<string[]>((hostsArray, nextValue) => {
+      hostsArray.push(...nextValue);
+      return hostsArray;
+    }, [])
+      .map((hostString) => {
+        try {
+          return new URL(hostString).host;
+        } catch (_) {
+          return hostString;
+        }
+      });
   }
 }

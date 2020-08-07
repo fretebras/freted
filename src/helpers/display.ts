@@ -15,6 +15,6 @@ export const printServices = (services: ServiceDefinition[]) => {
     if (service.welcomeText) lines.push(service.welcomeText);
   }
 
-  console.log('');
-  console.log(marked(lines.join('\n')));
+  process.stdout.write('');
+  process.stdout.write(marked(lines.join('\n')));
 };
