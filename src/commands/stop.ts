@@ -1,4 +1,4 @@
-import { Command } from '@oclif/command';
+import { Command, flags } from '@oclif/command';
 import * as Listr from 'listr';
 import ManagerService from '../manager';
 import Resolver from '../resolver';
@@ -15,6 +15,14 @@ export default class Stop extends Command {
     },
   ];
 
+  static flags = {
+    'no-edit-hosts': flags.boolean({
+      description: 'don\'t edit /etc/hosts file to remove dns links',
+      required: false,
+      default: false,
+    }),
+  };
+
   static examples = [
     '$ freted stop web/site',
   ];
@@ -26,7 +34,7 @@ export default class Stop extends Command {
   private hostsEditor = new HostsEditor();
 
   async run() {
-    const { args: { service: serviceName } } = this.parse(Stop);
+    const { args: { service: serviceName }, flags: stopFlags } = this.parse(Stop);
 
     try {
       const service = await this.resolver.resolveService(serviceName);
@@ -44,13 +52,16 @@ export default class Stop extends Command {
             await this.manager.stop([service, ...dependencies]);
           },
         },
-        {
+      ]);
+
+      if (!stopFlags['no-edit-hosts']) {
+        tasks.add({
           title: 'Remove aliases from hosts file',
           task: async () => {
-            // await this.hostsEditor.removeHosts([service, ...dependencies]);
+            await this.hostsEditor.removeHosts([service, ...dependencies]);
           },
-        },
-      ]);
+        });
+      }
 
       await tasks.run();
     } catch (e) {

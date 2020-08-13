@@ -6,16 +6,18 @@ import { ProviderName, ProviderConfig, ServiceDefinition } from './types';
 type ConfigFile = {
   providers: ProviderConfig[];
   services: ServiceDefinition[];
+  workspacePath ?: string;
 };
 
 const defaultConfig: ConfigFile = {
   providers: [],
   services: [],
+  workspacePath: undefined,
 };
 
 export default class Config {
   static getWorkspacePath(): string {
-    return path.resolve(os.homedir(), 'Development');
+    return this.loadConfig().workspacePath || path.resolve(os.homedir(), 'Development');
   }
 
   static getProviders(): ProviderConfig[] {

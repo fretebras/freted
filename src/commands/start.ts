@@ -1,7 +1,9 @@
 import { Command, flags } from '@oclif/command';
 import * as Listr from 'listr';
 import * as execa from 'execa';
+import * as path from 'path';
 import { Observable } from 'rxjs';
+import * as fs from 'fs';
 import { ServiceDefinition } from '../types';
 import ManagerService from '../manager';
 import Resolver from '../resolver';
@@ -32,6 +34,11 @@ export default class Start extends Command {
     }),
     'no-optional-dependencies': flags.boolean({
       description: 'don\'t start service optional dependencies',
+      required: false,
+      default: false,
+    }),
+    'no-edit-hosts': flags.boolean({
+      description: 'don\'t edit /etc/hosts file to create dns links',
       required: false,
       default: false,
     }),
@@ -81,6 +88,19 @@ export default class Start extends Command {
           }),
         },
         {
+          title: 'Copy environment file (.env, if exists)',
+          task: () => new Observable((resolve) => {
+            const allServices = [service, ...dependencies];
+            let done = 0;
+            this.copyEnvFile(allServices, (currentService) => {
+              done += 1;
+              resolve.next(`(${done}/${allServices.length}) ${currentService.name}`);
+            })
+              .then(() => resolve.complete())
+              .catch((e) => resolve.error(e));
+          }),
+        },
+        {
           title: 'Start services',
           task: () => new Observable((resolve) => {
             this.manager.start(
@@ -92,13 +112,16 @@ export default class Start extends Command {
               .catch((e) => resolve.error(e));
           }),
         },
-        {
+      ]);
+
+      if (!startFlags['no-edit-hosts']) {
+        tasks.add({
           title: 'Add aliases to hosts file',
           task: async () => {
-            // await this.hostsEditor.addHosts([service, ...dependencies]);
+            await this.hostsEditor.addHosts([service, ...dependencies]);
           },
-        },
-      ]);
+        });
+      }
 
       await tasks.run();
 
@@ -138,6 +161,22 @@ export default class Start extends Command {
         service.repository.cloneUrl,
         service.localPath,
       ]);
+    }
+  }
+
+  private async copyEnvFile(
+    services: ServiceDefinition[],
+    onCopy: (repository: ServiceDefinition) => void,
+  ): Promise<void> {
+    for (const service of services) {
+      const envExPath = path.resolve(service.localPath, '.env.example');
+      const envPath = envExPath.replace('.example', '');
+      if (!fs.existsSync(envExPath)) continue;
+      if (fs.existsSync(envPath)) continue;
+
+      onCopy(service);
+
+      await execa('cp', [envExPath, envPath]);
     }
   }
 }

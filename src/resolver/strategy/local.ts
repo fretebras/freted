@@ -13,7 +13,7 @@ export default class LocalResolver implements ResolverInterface {
     for (const providerPath of fs.readdirSync(workspacePath)) {
       const repositoryPath = path.resolve(workspacePath, providerPath, serviceName);
       const composePath = path.resolve(repositoryPath, 'docker-compose.yml');
-      const readmePath = path.resolve(repositoryPath, 'readme.md');
+      const readmePath = path.resolve(repositoryPath, 'README.md');
 
       if (fs.existsSync(composePath)) {
         const composeData = fs.readFileSync(composePath);
