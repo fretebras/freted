@@ -1,6 +1,8 @@
 image: node:12-alpine
+
 variables:
   GIT_CLONE_PATH: "${CI_BUILDS_DIR}/${CI_PROJECT_PATH}"
+
 cache:
   key:
     files:

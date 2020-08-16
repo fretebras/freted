@@ -2,10 +2,17 @@
   "name": "freted",
   "description": "FreteBras development CLI",
   "version": "0.0.6",
+  "license": "MIT",
+  "homepage": "https://github.com/fretebras/freted",
+  "keywords": [
+    "freted",
+    "developer-tools",
+    "dependency-manager"
+  ],
+  "bugs": "https://github.com/fretebras/freted/issues",
   "bin": {
     "freted": "./bin/run"
   },
-  "bugs": "https://gitlab.fretebras.com.br/dev/freted/-/issues",
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
@@ -56,11 +63,6 @@
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://gitlab.fretebras.com.br/dev/freted",
-  "keywords": [
-    "oclif"
-  ],
-  "license": "UNLICENSED",
   "main": "lib/index.js",
   "oclif": {
     "commands": "./lib/commands",
@@ -69,7 +71,7 @@
       "@oclif/plugin-help"
     ]
   },
-  "repository": "https://gitlab.fretebras.com.br/dev/freted",
+  "repository": "https://github.com/fretebras/freted",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
