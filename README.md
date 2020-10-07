@@ -40,10 +40,6 @@ To start using `freted`, follow those steps:
 $ npm install -g freted
 ```
 
-#### Using the binaries
-
-*TODO*
-
 ### 2. Authenticate with GitLab
 ```shell
 $ freted login
