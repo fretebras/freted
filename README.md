@@ -34,20 +34,15 @@ To start using `freted`, follow those steps:
 
 ### 1. Install `freted`
 
-#### Linux and macOS
-Clone the project and install npm dependencies:
+#### Using NPM
 
 ```shell
-$ git clone git@github.com:fretebras/freted.git ~/Development/fretebras/dev/freted
-$ cd ~/Development/fretebras/dev/freted
-$ yarn
+$ npm install -g freted
 ```
 
-Create an alias to use the cli from anywhere (add to your `.bashrc`, `.zshrc`, etc):
+#### Using the binaries
 
-```shell
-alias freted=~/Development/fretebras/dev/freted/bin/run
-```
+*TODO*
 
 ### 2. Authenticate with GitLab
 ```shell
