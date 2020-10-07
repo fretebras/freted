@@ -6,13 +6,7 @@
 [![License](https://img.shields.io/github/license/fretebras/freted)](https://github.com/fretebras/freted/blob/master/LICENSE.md)
 
 <!-- toc -->
-* [About](#about)
-* [Technology](#technology)
-* [Requirements](#requirements)
-* [Getting started](#getting-started)
-* [Configuring services](#configuring-services)
-* [CLI Usage](#cli-usage)
-* [Commands](#commands)
+* [freted](#freted)
 <!-- tocstop -->
 
 ## About
@@ -109,16 +103,16 @@ labels:
 
 ## CLI Usage
 <!-- usage -->
-```shell
+```sh-session
 $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.0.6 darwin-x64 node-v12.17.0
+freted/0.1.0 linux-x64 node-v13.11.0
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
-  ...
+...
 ```
 <!-- usagestop -->
 
@@ -132,8 +126,9 @@ USAGE
 * [`freted start SERVICE`](#freted-start-service)
 * [`freted stop SERVICE`](#freted-stop-service)
 
-#### `freted help [COMMAND]`
-Display help for `freted`
+## `freted help [COMMAND]`
+
+display help for freted
 
 ```
 USAGE
@@ -146,10 +141,11 @@ OPTIONS
   --all  see all commands in CLI
 ```
 
-*See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.0.1/src/commands/help.ts)*
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.0/src/commands/help.ts)_
 
-#### `freted inspect SERVICE`
-Inspect a service
+## `freted inspect SERVICE`
+
+inspect a service
 
 ```
 USAGE
@@ -159,11 +155,14 @@ ARGUMENTS
   SERVICE  name of the service
 
 EXAMPLE
-  $ freted inspect web/xyz
+  $ freted inspect web/site
 ```
 
-#### `freted login`
-Authenticate to supported providers
+_See code: [src/commands/inspect.ts](https://github.com/fretebras/freted/blob/v0.1.0/src/commands/inspect.ts)_
+
+## `freted login`
+
+authenticate to supported providers
 
 ```
 USAGE
@@ -173,8 +172,11 @@ EXAMPLE
   $ freted login
 ```
 
-#### `freted logs`
-Show services logs
+_See code: [src/commands/login.ts](https://github.com/fretebras/freted/blob/v0.1.0/src/commands/login.ts)_
+
+## `freted logs`
+
+show services logs
 
 ```
 USAGE
@@ -184,8 +186,11 @@ EXAMPLE
   $ freted logs
 ```
 
-#### `freted restart SERVICE`
-Restart a service
+_See code: [src/commands/logs.ts](https://github.com/fretebras/freted/blob/v0.1.0/src/commands/logs.ts)_
+
+## `freted restart SERVICE`
+
+restart a service
 
 ```
 USAGE
@@ -195,11 +200,14 @@ ARGUMENTS
   SERVICE  name of the service to restart
 
 EXAMPLE
-  $ freted restart web/xyz
+  $ freted restart web/site
 ```
 
-#### `freted start SERVICE`
-Start a service
+_See code: [src/commands/restart.ts](https://github.com/fretebras/freted/blob/v0.1.0/src/commands/restart.ts)_
+
+## `freted start SERVICE`
+
+start a service
 
 ```
 USAGE
@@ -211,14 +219,18 @@ ARGUMENTS
 OPTIONS
   --build                     rebuild containers before start
   --no-dependencies           don't start service dependencies
+  --no-edit-hosts             don't edit /etc/hosts file to create dns links
   --no-optional-dependencies  don't start service optional dependencies
 
 EXAMPLE
-  $ freted start web/xyz
+  $ freted start web/site
 ```
 
-#### `freted stop SERVICE`
-Stop a service
+_See code: [src/commands/start.ts](https://github.com/fretebras/freted/blob/v0.1.0/src/commands/start.ts)_
+
+## `freted stop SERVICE`
+
+stop a service
 
 ```
 USAGE
@@ -227,7 +239,12 @@ USAGE
 ARGUMENTS
   SERVICE  name of the service to stop
 
+OPTIONS
+  --no-edit-hosts  don't edit /etc/hosts file to remove dns links
+
 EXAMPLE
-  $ freted stop web/xyz
+  $ freted stop web/site
 ```
+
+_See code: [src/commands/stop.ts](https://github.com/fretebras/freted/blob/v0.1.0/src/commands/stop.ts)_
 <!-- commandsstop -->
