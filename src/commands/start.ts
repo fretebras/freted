@@ -1,9 +1,7 @@
 import { Command, flags } from '@oclif/command';
 import * as Listr from 'listr';
 import * as execa from 'execa';
-import * as path from 'path';
 import { Observable } from 'rxjs';
-import * as fs from 'fs';
 import { ServiceDefinition } from '../types';
 import ManagerService from '../manager';
 import Resolver from '../resolver';
@@ -22,11 +20,6 @@ export default class Start extends Command {
   ];
 
   static flags = {
-    build: flags.boolean({
-      description: 'rebuild containers before start',
-      required: false,
-      default: false,
-    }),
     'no-dependencies': flags.boolean({
       description: 'don\'t start service dependencies',
       required: false,
@@ -45,7 +38,7 @@ export default class Start extends Command {
   };
 
   static examples = [
-    '$ freted start web/site',
+    '$ freted start github.com/myorg/myproject',
   ];
 
   private resolver = new Resolver();
@@ -64,55 +57,41 @@ export default class Start extends Command {
         this.error(`Service '${serviceName}' not found.`);
       }
 
+      const tasks = new Listr();
+
       const dependencies = await this.resolveDependencies(service, startFlags);
+      const servicesToClone = this.getServicesToClone([service, ...dependencies]);
 
-      const tasks = new Listr([
-        {
-          title: 'Clone repositories',
-          task: (_, task) => new Observable((resolve) => {
-            const repositoriesToClone = this.getRepositoriesToClone([service, ...dependencies]);
+      if (servicesToClone.length > 0) {
+        for (const s of servicesToClone) {
+          tasks.add({
+            title: `Clone service ${s.config?.name}`,
+            task: () => new Observable((resolve) => {
+              this.cloneRepository(s, (message) => resolve.next(message))
+                .then(() => resolve.complete())
+                .catch((e) => resolve.error(e));
+            }),
+          });
 
-            if (repositoriesToClone.length === 0) {
-              task.skip('All repositories are already cloned.');
-              resolve.complete();
-              return;
-            }
+          tasks.add({
+            title: `Setup service ${s.config?.name}`,
+            task: () => new Observable((resolve) => {
+              this.manager.setup(s, (message) => resolve.next(message));
+            }),
+          });
+        }
+      }
 
-            let done = 0;
-            this.cloneRepositories(repositoriesToClone, (repository) => {
-              done += 1;
-              resolve.next(`(${done}/${repositoriesToClone.length}) ${repository.name}`);
-            })
-              .then(() => resolve.complete())
-              .catch((e) => resolve.error(e));
-          }),
-        },
-        {
-          title: 'Copy environment file (.env, if exists)',
+      for (const s of [service, ...dependencies]) {
+        tasks.add({
+          title: `Start service ${s.config?.name}`,
           task: () => new Observable((resolve) => {
-            const allServices = [service, ...dependencies];
-            let done = 0;
-            this.copyEnvFile(allServices, (currentService) => {
-              done += 1;
-              resolve.next(`(${done}/${allServices.length}) ${currentService.name}`);
-            })
+            this.manager.start(s, (message) => resolve.next(message))
               .then(() => resolve.complete())
               .catch((e) => resolve.error(e));
           }),
-        },
-        {
-          title: 'Start services',
-          task: () => new Observable((resolve) => {
-            this.manager.start(
-              [service, ...dependencies],
-              startFlags.build,
-              (message) => resolve.next(message),
-            )
-              .then(() => resolve.complete())
-              .catch((e) => resolve.error(e));
-          }),
-        },
-      ]);
+        });
+      }
 
       if (!startFlags['no-edit-hosts']) {
         tasks.add({
@@ -143,40 +122,25 @@ export default class Start extends Command {
     );
   }
 
-  private getRepositoriesToClone(services: ServiceDefinition[]): ServiceDefinition[] {
+  private getServicesToClone(services: ServiceDefinition[]): ServiceDefinition[] {
     return services.filter((service) => service.repository);
   }
 
-  private async cloneRepositories(
-    services: ServiceDefinition[],
-    onClone: (repository: ServiceDefinition) => void,
+  private async cloneRepository(
+    service: ServiceDefinition,
+    onUpdate: (message: string) => void,
   ): Promise<void> {
-    for (const service of services) {
-      if (!service.repository) continue;
+    if (!service.repository) return;
 
-      onClone(service);
+    const subprocess = execa('git', [
+      'clone',
+      service.repository.cloneUrl,
+      service.localPath,
+    ]);
 
-      await execa('git', [
-        'clone',
-        service.repository.cloneUrl,
-        service.localPath,
-      ]);
-    }
-  }
+    subprocess.stdout.on('data', (data) => onUpdate(data.toString()));
 
-  private async copyEnvFile(
-    services: ServiceDefinition[],
-    onCopy: (repository: ServiceDefinition) => void,
-  ): Promise<void> {
-    for (const service of services) {
-      const envExPath = path.resolve(service.localPath, '.env.example');
-      const envPath = envExPath.replace('.example', '');
-      if (!fs.existsSync(envExPath)) continue;
-      if (fs.existsSync(envPath)) continue;
-
-      onCopy(service);
-
-      await execa('cp', [envExPath, envPath]);
-    }
+    await subprocess;
+    await this.manager.setup(service, onUpdate);
   }
 }

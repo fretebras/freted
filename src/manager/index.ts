@@ -1,44 +1,31 @@
-import * as path from 'path';
 import * as execa from 'execa';
 import { ServiceDefinition } from '../types';
 import dependencies from './core-dependencies';
-import ComposerEditor from './composer-editor';
 
 export default class ManagerService {
-  private composerEditor = new ComposerEditor();
+  async setup(
+    service: ServiceDefinition,
+    onUpdate: (message: string) => void,
+  ): Promise<void> {
+    if (service.config?.setup) {
+      await this.runCommands(service.localPath, service.config.setup, onUpdate);
+    }
+  }
 
   async start(
-    services: ServiceDefinition[],
-    rebuild: boolean,
+    service: ServiceDefinition,
     onUpdate: (message: string) => void,
   ): Promise<void> {
     await this.startDependencies();
 
-    for (const service of services) {
-      const args = [
-        ...this.getComposeArgsForService(service),
-        'up',
-        '--detach',
-        '--no-color',
-        '--remove-orphans',
-      ];
-
-      if (rebuild) args.push('--build');
-
-      const subprocess = execa('docker-compose', args);
-      subprocess.stdout.on('data', (data) => onUpdate(data.toString()));
-
-      await subprocess;
+    if (service.config?.start) {
+      await this.runCommands(service.localPath, service.config.start, onUpdate);
     }
   }
 
-  async stop(services: ServiceDefinition[]): Promise<void> {
-    for (const service of services) {
-      await execa('docker-compose', [
-        ...this.getComposeArgsForService(service),
-        'down',
-        '--remove-orphans',
-      ]);
+  async stop(service: ServiceDefinition): Promise<void> {
+    if (service.config?.stop) {
+      await this.runCommands(service.localPath, service.config.stop);
     }
 
     await this.stopDependencies();
@@ -60,14 +47,15 @@ export default class ManagerService {
     }
   }
 
-  private getComposeArgsForService(service: ServiceDefinition): string[] {
-    const composePath = path.resolve(service.localPath, 'docker-compose.yml');
+  private async runCommands(cwd: string, commands: string[], onUpdate?: (message: string) => void) {
+    for (const command of commands) {
+      const subprocess = execa.command(command, { cwd });
 
-    return [
-      '--no-ansi',
-      '--project-name', service.name.replace(/\//g, '-'),
-      '--project-directory', service.localPath,
-      '-f', this.composerEditor.modify(composePath, service),
-    ];
+      if (onUpdate) {
+        subprocess.stdout.on('data', (data) => onUpdate(data.toString()));
+      }
+
+      await subprocess;
+    }
   }
 }

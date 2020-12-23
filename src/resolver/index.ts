@@ -15,15 +15,15 @@ export default class Resolver {
     service: ServiceDefinition,
     includeOptionals: boolean,
   ): Promise<ServiceDefinition[]> {
+    if (!service.config) return [];
+
     const dependencies: ServiceDefinition[] = [];
 
-    const serviceDependencies = this.getServiceDependencyList(service, includeOptionals)
-      .filter((dependency) => !dependencies.some((d) => d.name === dependency));
-
+    const serviceDependencies = this.getServiceDependencyList(service, includeOptionals);
     if (serviceDependencies.length === 0) return [];
 
     for (const serviceName of serviceDependencies) {
-      if (dependencies.some((d) => d.name === serviceName)) continue;
+      if (dependencies.some((d) => d.config?.name === serviceName)) continue;
 
       const dependency = await this.resolveService(serviceName);
 
@@ -32,14 +32,14 @@ export default class Resolver {
         continue;
       }
 
-      throw new Error(`Couldn't resolve dependency '${serviceName}' of ${service.name}. Check if you have the right permissions`);
+      throw new Error(`Couldn't resolve dependency '${serviceName}' of ${service.config?.name}. Check if you have the right permissions`);
     }
 
     for (const dependency of dependencies) {
       const childDeps = await this.resolveDependencies(dependency, includeOptionals);
 
       for (const dep of childDeps) {
-        if (dependencies.some((d) => d.name === dep.name)) continue;
+        if (dependencies.some((d) => d.config?.name === dep.config?.name)) continue;
         dependencies.push(dep);
       }
     }
@@ -52,8 +52,8 @@ export default class Resolver {
     includeOptionals: boolean,
   ): string[] {
     return [
-      ...(service.dependencies || []),
-      ...(includeOptionals ? service.optionalDependencies || [] : []),
+      ...(service.config?.dependencies || []),
+      ...(includeOptionals ? service.config?.optionalDependencies || [] : []),
     ];
   }
 }

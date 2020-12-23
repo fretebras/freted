@@ -16,24 +16,27 @@ export type Repository = {
 };
 
 export type ServiceDefinition = {
-  name: string;
   localPath: string;
   repository?: Repository;
-  welcomeText?: string;
-  dependencies?: string[];
-  optionalDependencies?: string[];
-  routes?: { [ serviceName: string ]: string[] };
+  config?: ServiceConfig;
 };
 
-export type ComposeFile = {
-  version: string;
-  services: {
-    [ name: string ]: {
-      networks?: { [ name: string ]: object },
-      labels?: string[];
-    };
+export type ServiceConfig = {
+  name: string;
+  description: string;
+  dependencies?: string[];
+  optionalDependencies?: string[];
+  routes?: {
+    host: string;
+    port: string;
   };
-  networks?: { [ name: string ]: {
-    external?: boolean;
-  }};
+  instructions?: string[];
+  credentials?: {
+    name: string;
+    description: string;
+  } & { [ field: string ]: string }[];
+  setup?: string[];
+  start?: string[];
+  stop?: string[];
+  test?: string[];
 };

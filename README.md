@@ -10,7 +10,7 @@
 <!-- tocstop -->
 
 ## About
-`$ freted` uses Docker and Git to manage environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
+`$ freted` uses manages environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
 
 ## Technology
 - Node
@@ -19,7 +19,6 @@
 
 ## Requirements
 To use `freted` you need the following dependencies installed in your machine:
-- Docker (with docker-compose)
 - Git
 - Node
 
@@ -34,72 +33,68 @@ To start using `freted`, follow those steps:
 $ npm install -g freted
 ```
 
-### 2. Authenticate with GitLab
+### 2. Authenticate with GitLab or GitHub
 ```shell
 $ freted login
 ```
 
 ### 3. Start a service
-Enter the service name as an argument to the `start` command. The service name is the path of the repository.  
-*For example, for the repository `https://github.com/web/xyz` the name is `web/xyz`.*
+Enter the service name as an argument to the `start` command. The service name is URL of the repository without the protocol.  
+*For example, for the repository `https://github.com/web/xyz` the name is `github.com/web/xyz`.*
 
-If the repository don't exists locally, `freted` will clone in your workspace.  
-*Your workspace will be at `~/Development`. The following directory tree will be used to organize the projects:*
+If the repository don't exists locally, `freted` will clone in your workspace if you granted your credentials using `$ freted login`.
 
-```yaml
-~/Development
-  fretebras
-    web
-      xyz
-      xpto
-    app
-      xyz
-```
-
-If you are working on a new project and it doesn't have a repository yet, `freted` will try to resolve the local directory of the project using the above directory tree.
+If you are working on a new project and it doesn't have a repository yet, `freted` will try to resolve the local directory within your workspace.
 
 ```shell
-$ freted start web/xyz
+$ freted start github.com/web/xyz
 ```
 
 #### Configuring services
-Any repositories that have a `docker-compose.yml` can be started using `freted`.  
-To use additional features of `freted`, the following configurations can be made:
+To allow a project to be run with `freted`, create a file on the root of your project named `freted.yml` with the following content:
+
+```yaml
+name: github.com/web/xyz
+description: My awesome project
+```
+
+You can find a full example of a config file on the repository.
 
 #### Dependencies
-`freted` is also a dependency manager. If you have a service (like a SPA) that depends on another (like an API), you can declare this dependency on the project's `README.md`:
+`freted` is also a dependency manager. If you have a service (like a SPA) that depends on another (like an API), you can declare this dependency on `freted.yml`:
 
-```
-<!-- dependencies -->
-[dev/xyz_database](https://github.com/fretebras/dev/xyz_database)
-<!-- dependenciesstop -->
-```
+```yaml
+dependencies:
+  - github.com/web/xyz
 
-All links inside the `dependencies` section will be considered as dependencies and will be automatically started.  
-> Note: *At this moment, only the link label will be used to resolve the dependencies. For this reason, the label must be the service name following the same naming convention presented above.*
+optionalDependencies:
+  - github.com/web/xyz
+```
 
 #### Credentials and instructions
-The `welcome` section will be rendered on the terminal after the start of the service. It's a good place to put default credentials and quick notes for the developers.
+You can use the `freted.yml` to put default credentials and quick notes for the developers. Those instructions will be shown on the terminal after the application starts.
 
-```
-<!-- welcome -->
-Use those credentials to login:
-Active company: user@company.com - pass
-Suspended company: user-suspended@company.com - pass
-<!-- welcomestop -->
+```yaml
+instructions:
+  - Sign-in using one of the credentials provided.
+
+credentials:
+  - name: Active user
+    description: User active on the app
+    email: foo@bar.com
+    password: mysecretpass
 ```
 
 ### 4. HTTP entrypoint
 `freted` uses Traefik to facilitate the organization and communication between all services. The Traefik container is automatically managed by `freted`.
 
-If your service can be accessed through HTTP, edit the `docker-compose.yml` and set the following label to the container that has a HTTP server:
+If your service can be accessed through HTTP, edit the `freted.yml` and add the following config:
 
 ```yaml
-labels:
-  - freted.host=xyz.fretebras.local
+routes:
+  - host: myproject.myorg.local
+    port: 80
 ```
-
-> Note: *By default, Traefik will use the `EXPOSED` port defined on the project's `Dockerfile` to route the requests.*
 
 ## CLI Usage
 <!-- usage -->

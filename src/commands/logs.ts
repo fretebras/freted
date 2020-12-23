@@ -2,7 +2,7 @@ import { Command } from '@oclif/command';
 import * as execa from 'execa';
 import { terminal } from 'terminal-kit';
 
-export default class Monit extends Command {
+export default class Logs extends Command {
   static description = 'show services logs';
 
   static examples = [

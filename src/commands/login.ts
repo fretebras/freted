@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 import Config from '../config';
 import AdapterFactory from '../adapter/factory';
 
-export default class Update extends Command {
+export default class Login extends Command {
   static description = 'authenticate to supported providers';
 
   static examples = [
@@ -22,13 +22,13 @@ export default class Update extends Command {
         name: 'name',
         message: 'Name',
         type: 'input',
-        default: 'FreteBras',
+        default: 'GitLab',
       },
       {
         name: 'url',
         message: 'Server URL',
         type: 'input',
-        default: 'https://gitlab.fretebras.com.br/',
+        default: 'https://gitlab.com/',
         when: ({ provider }) => provider === 'GitLab',
       },
       {

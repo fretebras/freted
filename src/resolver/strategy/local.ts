@@ -1,33 +1,65 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { parse } from 'yaml';
 import { ServiceDefinition } from '../../types';
 import { ResolverInterface } from './resolver';
 import Config from '../../config';
 import ServiceDefinitionBuilder from '../service-builder';
+import ConfigParser from '../config-parser';
 
 export default class LocalResolver implements ResolverInterface {
+  private parser = new ConfigParser();
+
+  private maxDepth = 4;
+
   async resolve(serviceName: string): Promise<ServiceDefinition | undefined> {
     const workspacePath = Config.getWorkspacePath();
+    return this.findServiceAt(serviceName, workspacePath);
+  }
 
-    for (const providerPath of fs.readdirSync(workspacePath)) {
-      const repositoryPath = path.resolve(workspacePath, providerPath, serviceName);
-      const composePath = path.resolve(repositoryPath, 'docker-compose.yml');
-      const readmePath = path.resolve(repositoryPath, 'README.md');
+  private async findServiceAt(
+    serviceName: string,
+    currentPath: string,
+    depth: number = 0,
+  ): Promise<ServiceDefinition | undefined> {
+    if (depth >= this.maxDepth) {
+      return undefined;
+    }
 
-      if (fs.existsSync(composePath)) {
-        const composeData = fs.readFileSync(composePath);
-        const readmeData = fs.readFileSync(readmePath);
-        const composeFile = parse(composeData.toString());
-        const readmeFile = readmeData.toString();
+    const files = fs.readdirSync(currentPath);
 
-        return ServiceDefinitionBuilder.new(serviceName, repositoryPath)
-          .setComposeFile(composeFile)
-          .setReadmeFile(readmeFile)
-          .build();
+    if (files.includes('freted.yml')) {
+      return this.loadServiceAt(serviceName, currentPath);
+    }
+
+    for (const file of files) {
+      const filePath = path.resolve(currentPath, file);
+
+      if (fs.lstatSync(filePath).isDirectory()) {
+        const service = await this.findServiceAt(serviceName, filePath, depth + 1);
+
+        if (service) {
+          return service;
+        }
       }
     }
 
     return undefined;
+  }
+
+  private async loadServiceAt(
+    serviceName: string,
+    servicePath: string,
+  ): Promise<ServiceDefinition | undefined> {
+    const configPath = path.resolve(servicePath, 'freted.yml');
+    const configContent = fs.readFileSync(configPath);
+    const config = this.parser.parse(configContent.toString());
+
+    if (config.name !== serviceName) {
+      return undefined;
+    }
+
+    return new ServiceDefinitionBuilder(servicePath)
+      .setConfig(config)
+      .build();
   }
 }

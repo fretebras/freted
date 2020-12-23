@@ -11,8 +11,29 @@ export const printServices = (services: ServiceDefinition[]) => {
   const lines: string[] = ['# Services summary'];
 
   for (const service of services) {
-    lines.push(`## ${service.name}`);
-    if (service.welcomeText) lines.push(service.welcomeText);
+    if (!service.config) continue;
+
+    lines.push(`## ${service.config.name}`);
+
+    if (service.config.instructions) {
+      lines.push(...service.config.instructions);
+    }
+    
+    if (service.config.credentials) {
+      lines.push('### Credentials');
+
+      for (const item of service.config.credentials) {
+        const { name, description, ...fields } = item;
+
+        lines.push(`**${name}** - *${description}*`);
+
+        for (const fieldName in fields) {
+          lines.push(`**${fieldName}**: ${fields[fieldName]}`);
+        }
+
+        lines.push('');
+      }
+    }
   }
 
   process.stdout.write('');

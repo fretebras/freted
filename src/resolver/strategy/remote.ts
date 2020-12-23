@@ -1,12 +1,14 @@
 import * as path from 'path';
-import { parse } from 'yaml';
 import { ServiceDefinition } from '../../types';
 import { ResolverInterface } from './resolver';
 import Config from '../../config';
 import AdapterFactory from '../../adapter/factory';
 import ServiceDefinitionBuilder from '../service-builder';
+import ConfigParser from '../config-parser';
 
 export default class RemoteResolver implements ResolverInterface {
+  private parser = new ConfigParser();
+
   async resolve(serviceName: string): Promise<ServiceDefinition | undefined> {
     for (const provider of Config.getProviders()) {
       const adapter = AdapterFactory.make(provider.providerName, provider.url);
@@ -19,16 +21,18 @@ export default class RemoteResolver implements ResolverInterface {
           serviceName,
         );
 
-        const composeData = await adapter.readRepositoryFile(repository, 'docker-compose.yml');
-        const readmeFile = await adapter.readRepositoryFile(repository, 'readme.yml');
+        const configContent = await adapter.readRepositoryFile(repository, 'freted.yml');
+        if (!configContent) continue;
 
-        if (composeData) {
-          return ServiceDefinitionBuilder.new(serviceName, localPath)
-            .setRepository(repository)
-            .setComposeFile(parse(composeData))
-            .setReadmeFile(readmeFile)
-            .build();
-        }
+        const config = this.parser.parse(configContent);
+        if (!config) continue;
+
+        if (config.name !== serviceName) continue;
+
+        return new ServiceDefinitionBuilder(localPath)
+          .setRepository(repository)
+          .setConfig(config)
+          .build();
       }
     }
 

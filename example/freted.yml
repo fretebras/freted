@@ -1,0 +1,33 @@
+name: github.com/myorg/myproject
+description: A CLI to manage local environments
+
+dependencies:
+  - github.com/myorg/mydep
+
+optionalDependencies:
+  - github.com/myorg/mydep2
+
+routes:
+  - host: myproject.myorg.local
+    port: 80
+
+instructions:
+  - Sign-in using one of the credentials provided.
+
+credentials:
+  - name: Active user
+    description: User active on the app
+    email: foo@bar.com
+    password: mysecretpass
+
+setup:
+  - cp .env.example .env
+
+start:
+  - docker-compose up -d
+
+stop:
+  - docker-compose down
+
+test:
+  - docker-compose exec app yarn test

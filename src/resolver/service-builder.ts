@@ -1,29 +1,19 @@
-import { ComposeFile, ServiceDefinition, Repository } from '../types';
-import ComposeFileParser from './parsers/compose';
-import ReadmeFileParser from './parsers/readme';
+import { ServiceDefinition, Repository, ServiceConfig } from '../types';
 
 export default class ServiceDefinitionBuilder {
-  private composeFileParser = new ComposeFileParser();
-
-  private readmeFileParser = new ReadmeFileParser();
-
-  private name: string;
-
   private localPath: string;
+
+  private config?: ServiceConfig;
 
   private repository?: Repository;
 
-  private composeFile?: ComposeFile;
-
-  private readmeFile?: string;
-
-  constructor(serviceName: string, localPath: string) {
-    this.name = serviceName;
+  constructor(localPath: string) {
     this.localPath = localPath;
   }
 
-  static new(name: string, localPath: string) {
-    return new ServiceDefinitionBuilder(name, localPath);
+  public setConfig(config: ServiceConfig) {
+    this.config = config;
+    return this;
   }
 
   public setRepository(repository: Repository) {
@@ -31,31 +21,11 @@ export default class ServiceDefinitionBuilder {
     return this;
   }
 
-  public setComposeFile(composeFile: ComposeFile) {
-    this.composeFile = composeFile;
-    return this;
-  }
-
-  public setReadmeFile(readmeFile?: string) {
-    this.readmeFile = readmeFile;
-    return this;
-  }
-
   public build(): ServiceDefinition {
-    const service: Partial<ServiceDefinition> = {
-      name: this.name,
+    return {
       localPath: this.localPath,
       repository: this.repository,
+      config: this.config,
     };
-
-    if (this.composeFile) {
-      Object.assign(service, this.composeFileParser.parse(this.composeFile));
-    }
-
-    if (this.readmeFile) {
-      Object.assign(service, this.readmeFileParser.parse(this.readmeFile));
-    }
-
-    return service as ServiceDefinition;
   }
 }
