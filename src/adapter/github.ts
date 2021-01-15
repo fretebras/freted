@@ -2,52 +2,57 @@ import Axios, { AxiosInstance } from 'axios';
 import { RepositoryAdapter } from './adapter';
 import { Repository, ProviderConfig } from '../types';
 
-type GitLabRepository = {
+type GitHubRepository = {
   id: string;
-  ssh_url_to_repo: string;
-  web_url: string;
+  url: string;
+  ssh_url: string;
   default_branch: string;
 };
 
-type GitLabFile = {
+type GitHubFile = {
   content: string;
 };
 
-export default class GitLabAdapter implements RepositoryAdapter {
+export default class GitHubAdapter implements RepositoryAdapter {
   private client: AxiosInstance;
 
-  constructor(url: string) {
+  constructor() {
     this.client = Axios.create({
-      baseURL: url,
+      baseURL: 'https://api.github.com',
     });
   }
 
-  async authenticate(token: string): Promise<boolean> {
+  async authenticate(password: string, username?: string): Promise<boolean> {
     try {
-      const { data } = await this.client.get('/api/v4/projects', {
-        params: {
-          private_token: token,
-          per_page: 1,
+      const { data } = await this.client.get('/user', {
+        auth: {
+          username: username!,
+          password,
         },
       });
 
-      return data.length > 0;
+      return true;
     } catch (_) {
       return false;
     }
   }
 
   async readRepositoryFile(
-    _: string,
+    serviceName: string,
     repository: Repository,
     fileName: string,
   ): Promise<string | undefined> {
+    const servicePath = serviceName.split('/').splice(1).join('/');
+
     try {
-      const { data } = await this.client.get<GitLabFile>(
-        `/api/v4/projects/${repository.id}/repository/files/${fileName}`,
+      const { data } = await this.client.get<GitHubFile>(
+        `/repos/${servicePath}/contents/${fileName}`,
         {
+          auth: {
+            username: repository.provider.username,
+            password: repository.provider.token,
+          },
           params: {
-            private_token: repository.provider.token,
             ref: repository.defaultBranch,
           },
         },
@@ -66,20 +71,21 @@ export default class GitLabAdapter implements RepositoryAdapter {
     const servicePath = serviceName.split('/').splice(1).join('/');
 
     try {
-      const { data } = await this.client.get<GitLabRepository>(
-        `/api/v4/projects/${encodeURIComponent(servicePath)}`,
+      const { data } = await this.client.get<GitHubRepository>(
+        `/repos/${servicePath}`,
         {
-          params: {
-            private_token: providerConfig.token,
+          auth: {
+            username: providerConfig.username,
+            password: providerConfig.token,
           },
         },
       );
 
       return {
-        provider: providerConfig,
         id: data.id,
-        url: data.web_url,
-        cloneUrl: data.ssh_url_to_repo,
+        provider: providerConfig,
+        url: data.url,
+        cloneUrl: data.ssh_url,
         defaultBranch: data.default_branch,
       };
     } catch (_) {

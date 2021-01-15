@@ -2,17 +2,17 @@ export type ProviderName = 'GitLab' | 'GitHub';
 
 export type ProviderConfig = {
   providerName: ProviderName;
-  name: string;
+  username: string;
   token: string;
   url?: string;
 };
 
 export type Repository = {
-  provider: ProviderConfig;
   id: string;
   url: string;
   cloneUrl: string;
   defaultBranch: string;
+  provider: ProviderConfig;
 };
 
 export type ServiceDefinition = {
@@ -27,9 +27,10 @@ export type ServiceConfig = {
   dependencies?: string[];
   optionalDependencies?: string[];
   routes?: {
+    container: string;
     host: string;
     port: string;
-  };
+  }[];
   instructions?: string[];
   credentials?: {
     name: string;

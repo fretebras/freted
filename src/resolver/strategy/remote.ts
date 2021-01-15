@@ -28,7 +28,7 @@ export default class RemoteResolver implements ResolverInterface {
           serviceName,
         );
 
-        const configContent = await adapter.readRepositoryFile(repository, 'freted.yml');
+        const configContent = await adapter.readRepositoryFile(serviceName, repository, 'freted.yml');
         if (!configContent) {
           Errors.warn(`A repository for the service ${serviceName} has been found but it doesn't have a freted.yml file.`);
           continue;

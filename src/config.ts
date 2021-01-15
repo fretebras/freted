@@ -28,17 +28,39 @@ export default class Config {
     return this.loadConfig().providers;
   }
 
-  static addProvider(providerName: ProviderName, name: string, url: string, token: string): void {
+  static addProvider(providerName: ProviderName, url: string, username: string, token: string): void {
     const config = this.loadConfig();
 
     config.providers.push({
       providerName,
-      name,
+      username,
       token,
       url,
     });
 
     this.writeConfig(config);
+  }
+
+  static updateProvider(providerName: ProviderName, url: string, username: string, token: string): void {
+    const config = this.loadConfig();
+    const providerIndex = this.findProvider(providerName, url);
+
+    if (providerIndex < 0) return;
+
+    config.providers[providerIndex].username = username;
+    config.providers[providerIndex].token = token;
+
+    this.writeConfig(config);
+  }
+
+  static providerExists(providerName: ProviderName, url?: string) {
+    return this.findProvider(providerName, url) >= 0;
+  }
+
+  private static findProvider(providerName: ProviderName, url?: string) {
+    return this.loadConfig().providers.findIndex(provider => (
+      provider.providerName === providerName && provider.url === url
+    ));
   }
 
   private static loadConfig(): ConfigFile {
