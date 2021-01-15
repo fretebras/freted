@@ -13,7 +13,7 @@ type GitLabFile = {
   content: string;
 };
 
-export default class GitlabAdapter implements RepositoryAdapter {
+export default class GitLabAdapter implements RepositoryAdapter {
   private client: AxiosInstance;
 
   constructor(url: string) {
@@ -62,9 +62,11 @@ export default class GitlabAdapter implements RepositoryAdapter {
     providerConfig: ProviderConfig,
     serviceName: string,
   ): Promise<Repository | undefined> {
+    const servicePath = serviceName.split('/').splice(1).join('/');
+
     try {
       const { data } = await this.client.get<GitLabRepository>(
-        `/api/v4/projects/${encodeURIComponent(serviceName)}`,
+        `/api/v4/projects/${encodeURIComponent(servicePath)}`,
         {
           params: {
             private_token: providerConfig.token,

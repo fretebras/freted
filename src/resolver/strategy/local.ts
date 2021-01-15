@@ -13,6 +13,7 @@ export default class LocalResolver implements ResolverInterface {
 
   async resolve(serviceName: string): Promise<ServiceDefinition | undefined> {
     const workspacePath = Config.getWorkspacePath();
+    this.ensureDirectoryExists(workspacePath);
     return this.findServiceAt(serviceName, workspacePath);
   }
 
@@ -61,5 +62,11 @@ export default class LocalResolver implements ResolverInterface {
     return new ServiceDefinitionBuilder(servicePath)
       .setConfig(config)
       .build();
+  }
+
+  private ensureDirectoryExists(directory_path: string) {
+    fs.mkdirSync(directory_path, {
+      recursive: true,
+    });
   }
 }

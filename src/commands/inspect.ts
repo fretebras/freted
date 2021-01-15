@@ -14,7 +14,7 @@ export default class Inspect extends Command {
   ];
 
   static examples = [
-    '$ freted inspect web/site',
+    '$ freted inspect github.com/myorg/myproject',
   ];
 
   private resolver = new Resolver();

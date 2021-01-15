@@ -14,7 +14,7 @@ export default class Restart extends Command {
   ];
 
   static examples = [
-    '$ freted restart web/site',
+    '$ freted restart github.com/myorg/myproject',
   ];
 
   async run() {
