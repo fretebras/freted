@@ -23,7 +23,7 @@ credentials:
     password: mysecretpass
 
 setup:
-  - cp .env.example .env
+  - docker-compode build
 
 start:
   - docker-compose up -d

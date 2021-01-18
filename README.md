@@ -77,9 +77,6 @@ start:
 
 stop:
   - docker-compose down
-
-test:
-  - docker-compose exec app yarn test
 ```
 
 ### Dependencies
