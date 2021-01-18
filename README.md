@@ -50,7 +50,7 @@ If you are working on a new project and it doesn't have a repository yet, `frete
 $ freted start github.com/web/xyz
 ```
 
-#### Configuring services
+## Configuring services
 To allow a project to be run with `freted`, create a file on the root of your project named `freted.yml` with the following content:
 
 ```yaml
@@ -60,7 +60,29 @@ description: My awesome project
 
 You can find a full example of a config file on the repository.
 
-#### Dependencies
+### Commands
+
+You can define the commands to setup, start, stop and test your services.
+
+- **setup**: will be run when you start the service for the first time.
+- **start**: will be run when you start the service.
+- **stop**: will be run when you stop the service.
+
+```yaml
+setup:
+  - docker-compose build
+
+start:
+  - docker-compose up -d
+
+stop:
+  - docker-compose down
+
+test:
+  - docker-compose exec app yarn test
+```
+
+### Dependencies
 `freted` is also a dependency manager. If you have a service (like a SPA) that depends on another (like an API), you can declare this dependency on `freted.yml`:
 
 ```yaml
@@ -71,7 +93,7 @@ optionalDependencies:
   - github.com/web/xyz
 ```
 
-#### Credentials and instructions
+### Credentials and instructions
 You can use the `freted.yml` to put default credentials and quick notes for the developers. Those instructions will be shown on the terminal after the application starts.
 
 ```yaml
@@ -85,7 +107,7 @@ credentials:
     password: mysecretpass
 ```
 
-### 4. HTTP entrypoint
+### HTTP entrypoint
 `freted` uses Traefik to facilitate the organization and communication between all services. The Traefik container is automatically managed by `freted`.
 
 If your service can be accessed through HTTP, edit the `freted.yml` and add the following config:
@@ -94,7 +116,7 @@ If your service can be accessed through HTTP, edit the `freted.yml` and add the 
 routes:
   - host: myproject.myorg.local
     backend: docker
-    destination: myproject
+    destination: mycontainer_app
     port: 80
 ```
 
@@ -103,10 +125,11 @@ routes:
 ## CLI Usage
 <!-- usage -->
 ```sh-session
+$ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.1.1 linux-x64 node-v14.13.1
+freted/0.2.0 linux-x64 node-v14.13.1
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
@@ -137,7 +160,7 @@ EXAMPLE
   $ freted configure
 ```
 
-_See code: [src/commands/configure.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/configure.ts)_
+_See code: [src/commands/configure.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/configure.ts)_
 
 ## `freted help [COMMAND]`
 
@@ -168,10 +191,10 @@ ARGUMENTS
   SERVICE  name of the service
 
 EXAMPLE
-  $ freted inspect web/site
+  $ freted inspect github.com/myorg/myproject
 ```
 
-_See code: [src/commands/inspect.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/inspect.ts)_
+_See code: [src/commands/inspect.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/inspect.ts)_
 
 ## `freted login`
 
@@ -185,7 +208,7 @@ EXAMPLE
   $ freted login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/login.ts)_
 
 ## `freted logs`
 
@@ -199,7 +222,7 @@ EXAMPLE
   $ freted logs
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/logs.ts)_
 
 ## `freted restart SERVICE`
 
@@ -213,10 +236,10 @@ ARGUMENTS
   SERVICE  name of the service to restart
 
 EXAMPLE
-  $ freted restart web/site
+  $ freted restart github.com/myorg/myproject
 ```
 
-_See code: [src/commands/restart.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/restart.ts)_
+_See code: [src/commands/restart.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/restart.ts)_
 
 ## `freted start SERVICE`
 
@@ -231,14 +254,13 @@ ARGUMENTS
 
 OPTIONS
   --no-dependencies           don't start service dependencies
-  --no-edit-hosts             don't edit /etc/hosts file to create dns links
   --no-optional-dependencies  don't start service optional dependencies
 
 EXAMPLE
   $ freted start github.com/myorg/myproject
 ```
 
-_See code: [src/commands/start.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/start.ts)_
+_See code: [src/commands/start.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/start.ts)_
 
 ## `freted stop SERVICE`
 
@@ -253,12 +275,11 @@ ARGUMENTS
 
 OPTIONS
   --no-dependencies           don't start service dependencies
-  --no-edit-hosts             don't edit /etc/hosts file to remove dns links
   --no-optional-dependencies  don't start service optional dependencies
 
 EXAMPLE
   $ freted stop github.com/myorg/myproject
 ```
 
-_See code: [src/commands/stop.ts](https://github.com/fretebras/freted/blob/v0.1.1/src/commands/stop.ts)_
+_See code: [src/commands/stop.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/stop.ts)_
 <!-- commandsstop -->
