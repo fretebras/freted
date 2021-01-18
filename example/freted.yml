@@ -2,15 +2,19 @@ name: github.com/myorg/myproject
 description: A CLI to manage local environments
 
 dependencies:
-  - github.com/myorg/mydep
+  - github.com/myorg/myproject2
 
 optionalDependencies:
-  - github.com/myorg/mydep2
+  - github.com/myorg/myproject3
 
 routes:
   - host: myproject.myorg.local
     backend: docker
-    destination: freted-example
+    destination: myproject
+    port: 80
+  - host: myproject2.myorg.local
+    backend: docker
+    destination: myproject2
     port: 80
 
 instructions:

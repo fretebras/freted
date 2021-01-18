@@ -45,7 +45,7 @@ export const printServices = (services: ServiceDefinition[]) => {
       if (!service.config?.routes) continue;
 
       for (const route of service.config.routes) {
-        lines.push(`**${route.host}**`);
+        lines.push(`127.0.0.1 \`${route.host}\``);
       }
     }
   }

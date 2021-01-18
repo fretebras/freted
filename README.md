@@ -5,22 +5,23 @@
 [![Downloads/week](https://img.shields.io/npm/dw/freted.svg)](https://npmjs.org/package/freted)
 [![License](https://img.shields.io/github/license/fretebras/freted)](https://github.com/fretebras/freted/blob/master/LICENSE.md)
 
-<!-- toc -->
-* [freted](#freted)
-<!-- tocstop -->
+![freted banner](.github/banner.png)
 
 ## About
-`$ freted` uses manages environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
+`$ freted` uses Docker and Git to manage environments for local development of distributed systems. It works like a dependency manager (like Composer and npm) to resolve dependencies and start all on your local machine.
 
 ## Technology
+- Docker
 - Node
 - Oclif
 - TypeScript
+- Traefik
 
 ## Requirements
 To use `freted` you need the following dependencies installed in your machine:
+- Docker
 - Git
-- Node
+- Node >= 10
 
 ## Getting started
 To start using `freted`, follow those steps:
@@ -39,30 +40,32 @@ $ freted login
 ```
 
 ### 3. Start a service
-Enter the service name as an argument to the `start` command. The service name is URL of the repository without the protocol.  
-*For example, for the repository `https://github.com/web/xyz` the name is `github.com/web/xyz`.*
+Enter the service name as an argument to the `start` command. The service name is the URL of the repository without the protocol.
+*For example, for the repository `https://github.com/myorg/myproject` the name is `github.com/myorg/myproject`.*
 
 If the repository don't exists locally, `freted` will clone in your workspace if you granted your credentials using `$ freted login`.
 
 If you are working on a new project and it doesn't have a repository yet, `freted` will try to resolve the local directory within your workspace.
 
 ```shell
-$ freted start github.com/web/xyz
+$ freted start github.com/myorg/myproject
 ```
+
+This command will resolve and start the project and all it's dependencies and print a resume of all services.
 
 ## Configuring services
 To allow a project to be run with `freted`, create a file on the root of your project named `freted.yml` with the following content:
 
 ```yaml
-name: github.com/web/xyz
+name: github.com/myorg/myproject
 description: My awesome project
 ```
 
-You can find a full example of a config file on the repository.
+You can find a full example of a config file on the repository at [here](https://github.com/fretebras/freted/blob/master/example/freted.yml).
 
 ### Commands
 
-You can define the commands to setup, start, stop and test your services.
+You can define the commands to setup, start and stop your services.
 
 - **setup**: will be run when you start the service for the first time.
 - **start**: will be run when you start the service.
@@ -84,10 +87,10 @@ stop:
 
 ```yaml
 dependencies:
-  - github.com/web/xyz
+  - github.com/myorg/myproject2
 
 optionalDependencies:
-  - github.com/web/xyz
+  - github.com/myorg/myproject3
 ```
 
 ### Credentials and instructions
