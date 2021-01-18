@@ -15,7 +15,7 @@ export default class RemoteResolver implements ResolverInterface {
 
     if (providers.length === 0) {
       Errors.warn(`No providers are configured. The service ${serviceName} will not be resolved remotely. Run 'freted login' to fix it.`);
-      return;
+      return undefined;
     }
 
     for (const provider of providers) {

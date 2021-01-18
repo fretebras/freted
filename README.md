@@ -93,13 +93,16 @@ If your service can be accessed through HTTP, edit the `freted.yml` and add the 
 ```yaml
 routes:
   - host: myproject.myorg.local
+    backend: docker
+    destination: myproject
     port: 80
 ```
+
+*The field `destination` must be the name of the running container. With docker compose, set the field `container_name` on the service and use the same name here.*
 
 ## CLI Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)

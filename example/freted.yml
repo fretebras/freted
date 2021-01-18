@@ -9,6 +9,8 @@ optionalDependencies:
 
 routes:
   - host: myproject.myorg.local
+    backend: docker
+    destination: freted-example
     port: 80
 
 instructions:

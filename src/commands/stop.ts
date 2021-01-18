@@ -1,8 +1,8 @@
 import { Command, flags } from '@oclif/command';
 import * as Listr from 'listr';
 import ManagerService from '../manager';
+import Router from '../manager/router';
 import Resolver from '../resolver';
-import HostsEditor from '../manager/hosts-editor';
 import { ServiceDefinition } from '../types';
 
 export default class Stop extends Command {
@@ -27,11 +27,6 @@ export default class Stop extends Command {
       required: false,
       default: false,
     }),
-    'no-edit-hosts': flags.boolean({
-      description: 'don\'t edit /etc/hosts file to remove dns links',
-      required: false,
-      default: false,
-    }),
   };
 
   static examples = [
@@ -42,10 +37,12 @@ export default class Stop extends Command {
 
   private manager = new ManagerService();
 
-  private hostsEditor = new HostsEditor();
+  private router = new Router();
 
   async run() {
     const { args: { service: serviceName }, flags: stopFlags } = this.parse(Stop);
+
+    this.log(`Stopping service ${serviceName}.`);
 
     try {
       const service = await this.resolver.resolveService(serviceName);
@@ -55,21 +52,26 @@ export default class Stop extends Command {
       }
 
       const tasks = new Listr();
-
       const dependencies = await this.resolveDependencies(service, stopFlags);
 
       for (const s of [service, ...dependencies]) {
+        const { name, routes } = s.config!;
+
         tasks.add({
-          title: `Stop service ${s.config?.name}`,
+          title: `Stop service ${name}`,
           task: () => this.manager.stop(s),
         });
-      }
 
-      if (!stopFlags['no-edit-hosts']) {
-        tasks.add({
-          title: 'Remove aliases from hosts file',
-          task: () => this.hostsEditor.removeHosts([service, ...dependencies]),
-        });
+        if (routes?.length) {
+          for (const route of routes) {
+            const { host, destination } = route;
+
+            tasks.add({
+              title: `Remove route ${host} to container ${destination}`,
+              task: () => this.router.removeRoute(route),
+            });
+          }
+        }
       }
 
       await tasks.run();

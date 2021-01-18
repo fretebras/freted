@@ -54,7 +54,7 @@ export default class GitLabAdapter implements RepositoryAdapter {
       );
 
       return Buffer.from(data.content, 'base64').toString();
-    } catch (_) {
+    } catch (e) {
       return undefined;
     }
   }

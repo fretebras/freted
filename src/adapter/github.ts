@@ -24,7 +24,7 @@ export default class GitHubAdapter implements RepositoryAdapter {
 
   async authenticate(password: string, username?: string): Promise<boolean> {
     try {
-      const { data } = await this.client.get('/user', {
+      await this.client.get('/user', {
         auth: {
           username: username!,
           password,

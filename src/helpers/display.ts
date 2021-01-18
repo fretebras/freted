@@ -18,7 +18,7 @@ export const printServices = (services: ServiceDefinition[]) => {
     if (service.config.instructions) {
       lines.push(...service.config.instructions);
     }
-    
+
     if (service.config.credentials) {
       lines.push('### Credentials');
 
@@ -28,7 +28,7 @@ export const printServices = (services: ServiceDefinition[]) => {
         lines.push(`**${name}** - *${description}*`);
 
         for (const fieldName in fields) {
-          lines.push(`**${fieldName}**: ${fields[fieldName]}`);
+          lines.push(`**${fieldName}**: \`${fields[fieldName]}\``);
         }
 
         lines.push('');
@@ -36,6 +36,20 @@ export const printServices = (services: ServiceDefinition[]) => {
     }
   }
 
-  process.stdout.write('');
+  if (services.some((s) => s.config?.routes?.length)) {
+    lines.push('# Hosts');
+    lines.push('Add the following hosts to your hosts file.');
+    lines.push('\n');
+
+    for (const service of services) {
+      if (!service.config?.routes) continue;
+
+      for (const route of service.config.routes) {
+        lines.push(`**${route.host}**`);
+      }
+    }
+  }
+
+  process.stdout.write('\n\n');
   process.stdout.write(marked(lines.join('\n')));
 };

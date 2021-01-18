@@ -27,10 +27,26 @@ export default class NetworkDependency implements Dependency {
   }
 
   async stop(): Promise<void> {
+    if (this.hasConnections()) {
+      return;
+    }
+
     await execa('docker', [
       'network',
       'rm',
       NetworkDependency.identifier,
     ]);
+  }
+
+  private async hasConnections(): Promise<boolean> {
+    const data = await execa('docker', [
+      'network',
+      'inspect',
+      NetworkDependency.identifier,
+    ]);
+
+    const [network] = JSON.parse(data.stdout);
+
+    return Object.keys(network.Containers).length > 0;
   }
 }

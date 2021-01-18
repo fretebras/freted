@@ -46,7 +46,9 @@ export default class Login extends Command {
       },
     ]);
 
-    const { provider, username, url, token } = answers;
+    const {
+      provider, username, url, token,
+    } = answers;
 
     if (Config.providerExists(provider, url)) {
       Config.updateProvider(provider, url, username, token);

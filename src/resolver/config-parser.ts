@@ -9,6 +9,8 @@ export default class ConfigParser {
     dependencies: Joi.array().items(Joi.string()),
     optionalDependencies: Joi.array().items(Joi.string()),
     routes: Joi.array().items(Joi.object({
+      backend: Joi.string().required(),
+      destination: Joi.string().required(),
       host: Joi.string().required(),
       port: Joi.number().required(),
     })),

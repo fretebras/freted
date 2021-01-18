@@ -5,8 +5,9 @@ import { Observable } from 'rxjs';
 import { ServiceDefinition } from '../types';
 import ManagerService from '../manager';
 import Resolver from '../resolver';
-import HostsEditor from '../manager/hosts-editor';
 import { printServices } from '../helpers/display';
+import Router from '../manager/router';
+import Network from '../manager/network';
 
 export default class Start extends Command {
   static description = 'start a service';
@@ -30,11 +31,6 @@ export default class Start extends Command {
       required: false,
       default: false,
     }),
-    'no-edit-hosts': flags.boolean({
-      description: 'don\'t edit /etc/hosts file to create dns links',
-      required: false,
-      default: false,
-    }),
   };
 
   static examples = [
@@ -45,10 +41,14 @@ export default class Start extends Command {
 
   private manager = new ManagerService();
 
-  private hostsEditor = new HostsEditor();
+  private router = new Router();
+
+  private network = new Network();
 
   async run() {
     const { args: { service: serviceName }, flags: startFlags } = this.parse(Start);
+
+    this.log(`Starting service ${serviceName}.`);
 
     try {
       const service = await this.resolver.resolveService(serviceName);
@@ -83,23 +83,32 @@ export default class Start extends Command {
       }
 
       for (const s of [service, ...dependencies]) {
+        const { name, routes } = s.config!;
+
         tasks.add({
-          title: `Start service ${s.config?.name}`,
+          title: `Start service ${name}`,
           task: () => new Observable((resolve) => {
             this.manager.start(s, (message) => resolve.next(message))
               .then(() => resolve.complete())
               .catch((e) => resolve.error(e));
           }),
         });
-      }
 
-      if (!startFlags['no-edit-hosts']) {
-        tasks.add({
-          title: 'Add aliases to hosts file',
-          task: async () => {
-            await this.hostsEditor.addHosts([service, ...dependencies]);
-          },
-        });
+        if (routes?.length) {
+          for (const route of routes) {
+            const { host, port, destination } = route;
+
+            tasks.add({
+              title: `Connect container ${destination} to freted network`,
+              task: () => this.network.connectContainer(destination),
+            });
+
+            tasks.add({
+              title: `Configure route ${host} to container ${destination} on port ${port}`,
+              task: () => this.router.createRoute(route),
+            });
+          }
+        }
       }
 
       await tasks.run();

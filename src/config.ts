@@ -28,7 +28,12 @@ export default class Config {
     return this.loadConfig().providers;
   }
 
-  static addProvider(providerName: ProviderName, url: string, username: string, token: string): void {
+  static addProvider(
+    providerName: ProviderName,
+    url: string,
+    username: string,
+    token: string,
+  ): void {
     const config = this.loadConfig();
 
     config.providers.push({
@@ -41,7 +46,12 @@ export default class Config {
     this.writeConfig(config);
   }
 
-  static updateProvider(providerName: ProviderName, url: string, username: string, token: string): void {
+  static updateProvider(
+    providerName: ProviderName,
+    url: string,
+    username: string,
+    token: string,
+  ): void {
     const config = this.loadConfig();
     const providerIndex = this.findProvider(providerName, url);
 
@@ -58,7 +68,7 @@ export default class Config {
   }
 
   private static findProvider(providerName: ProviderName, url?: string) {
-    return this.loadConfig().providers.findIndex(provider => (
+    return this.loadConfig().providers.findIndex((provider) => (
       provider.providerName === providerName && provider.url === url
     ));
   }
@@ -70,7 +80,7 @@ export default class Config {
       return this.createDefaultConfig();
     }
 
-    const body = fs.readFileSync(this.getConfigPath());
+    const body = fs.readFileSync(configPath);
 
     return JSON.parse(body.toString()) as ConfigFile;
   }
@@ -81,11 +91,24 @@ export default class Config {
   }
 
   private static createDefaultConfig(): ConfigFile {
+    this.createConfigDir();
     this.writeConfig(defaultConfig);
     return defaultConfig;
   }
 
   private static getConfigPath(): string {
+    return path.join(this.getConfigDir(), 'config.json');
+  }
+
+  static getConfigDir(): string {
     return path.join(os.homedir(), '.freted');
+  }
+
+  private static createConfigDir() {
+    const configDirPath = this.getConfigDir();
+
+    if (!fs.existsSync(configDirPath)) {
+      fs.mkdirSync(configDirPath, { recursive: true });
+    }
   }
 }

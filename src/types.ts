@@ -21,16 +21,19 @@ export type ServiceDefinition = {
   config?: ServiceConfig;
 };
 
+export type ServiceRoute = {
+  backend: 'docker';
+  destination: string;
+  host: string;
+  port: number;
+};
+
 export type ServiceConfig = {
   name: string;
   description: string;
   dependencies?: string[];
   optionalDependencies?: string[];
-  routes?: {
-    container: string;
-    host: string;
-    port: string;
-  }[];
+  routes?: ServiceRoute[];
   instructions?: string[];
   credentials?: {
     name: string;
@@ -40,4 +43,24 @@ export type ServiceConfig = {
   start?: string[];
   stop?: string[];
   test?: string[];
+};
+
+export type TraefikRoutesConfig = {
+  http: {
+    routers: {
+      [ name: string ]: {
+        rule: string;
+        service: string;
+      };
+    };
+    services: {
+      [ name: string ]: {
+        loadBalancer: {
+          servers: {
+            url: string;
+          }[];
+        };
+      };
+    };
+  };
 };
