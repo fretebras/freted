@@ -126,7 +126,7 @@ $ npm install -g freted
 $ freted COMMAND
 running command...
 $ freted (-v|--version|version)
-freted/0.2.0 linux-x64 node-v14.13.1
+freted/0.2.1 linux-x64 node-v14.13.1
 $ freted --help [COMMAND]
 USAGE
   $ freted COMMAND
@@ -157,7 +157,7 @@ EXAMPLE
   $ freted configure
 ```
 
-_See code: [src/commands/configure.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/configure.ts)_
+_See code: [src/commands/configure.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/configure.ts)_
 
 ## `freted help [COMMAND]`
 
@@ -191,7 +191,7 @@ EXAMPLE
   $ freted inspect github.com/myorg/myproject
 ```
 
-_See code: [src/commands/inspect.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/inspect.ts)_
+_See code: [src/commands/inspect.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/inspect.ts)_
 
 ## `freted login`
 
@@ -205,7 +205,7 @@ EXAMPLE
   $ freted login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/login.ts)_
 
 ## `freted logs`
 
@@ -219,7 +219,7 @@ EXAMPLE
   $ freted logs
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/logs.ts)_
 
 ## `freted restart SERVICE`
 
@@ -236,7 +236,7 @@ EXAMPLE
   $ freted restart github.com/myorg/myproject
 ```
 
-_See code: [src/commands/restart.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/restart.ts)_
+_See code: [src/commands/restart.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/restart.ts)_
 
 ## `freted start SERVICE`
 
@@ -257,7 +257,7 @@ EXAMPLE
   $ freted start github.com/myorg/myproject
 ```
 
-_See code: [src/commands/start.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/start.ts)_
+_See code: [src/commands/start.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/start.ts)_
 
 ## `freted stop SERVICE`
 
@@ -278,5 +278,5 @@ EXAMPLE
   $ freted stop github.com/myorg/myproject
 ```
 
-_See code: [src/commands/stop.ts](https://github.com/fretebras/freted/blob/v0.2.0/src/commands/stop.ts)_
+_See code: [src/commands/stop.ts](https://github.com/fretebras/freted/blob/v0.2.1/src/commands/stop.ts)_
 <!-- commandsstop -->
