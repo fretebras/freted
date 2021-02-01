@@ -53,15 +53,20 @@ export default class LocalResolver implements ResolverInterface {
   ): Promise<ServiceDefinition | undefined> {
     const configPath = path.resolve(servicePath, 'freted.yml');
     const configContent = fs.readFileSync(configPath);
-    const config = this.parser.parse(configContent.toString());
 
-    if (config.name !== serviceName) {
-      return undefined;
+    try {
+      const config = this.parser.parse(configContent.toString());
+  
+      if (config.name !== serviceName) {
+        return undefined;
+      }
+  
+      return new ServiceDefinitionBuilder(servicePath)
+        .setConfig(config)
+        .build();
+    } catch (e) {
+      throw new Error(`Failed loading config at ${configPath}: ${e.message}`);
     }
-
-    return new ServiceDefinitionBuilder(servicePath)
-      .setConfig(config)
-      .build();
   }
 
   private ensureDirectoryExists(directory_path: string) {
