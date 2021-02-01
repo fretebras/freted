@@ -56,11 +56,11 @@ export default class LocalResolver implements ResolverInterface {
 
     try {
       const config = this.parser.parse(configContent.toString());
-  
+
       if (config.name !== serviceName) {
         return undefined;
       }
-  
+
       return new ServiceDefinitionBuilder(servicePath)
         .setConfig(config)
         .build();

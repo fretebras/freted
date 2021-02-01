@@ -1,31 +1,29 @@
 import * as os from 'os';
-import * as fs from 'fs';
 import * as path from 'path';
+import Conf from 'conf';
 import { ProviderName, ProviderConfig } from './types';
 
-type ConfigFile = {
-  providers: ProviderConfig[];
-  workspacePath ?: string;
-};
-
-const defaultConfig: ConfigFile = {
-  providers: [],
-  workspacePath: undefined,
-};
+const config = new Conf({
+  cwd: path.resolve(os.homedir(), '.freted'),
+  configName: 'config',
+  fileExtension: 'json',
+});
 
 export default class Config {
-  static getWorkspacePath(): string {
-    return this.loadConfig().workspacePath || path.resolve(os.homedir(), 'Development');
+  static get<T>(key: string, defaultValue: T): T {
+    return config.get(key, defaultValue) as T;
   }
 
-  static setWorkspacePath(workspacePath: string): void {
-    const config = this.loadConfig();
-    config.workspacePath = workspacePath;
-    this.writeConfig(config);
+  static set<T>(key: string, value: T) {
+    config.set(key, value);
+  }
+
+  static getWorkspacePath(): string {
+    return this.get<string>('workspacePath', path.resolve(os.homedir(), 'Development'));
   }
 
   static getProviders(): ProviderConfig[] {
-    return this.loadConfig().providers;
+    return this.get<ProviderConfig[]>('providers', []);
   }
 
   static addProvider(
@@ -34,16 +32,16 @@ export default class Config {
     username: string,
     token: string,
   ): void {
-    const config = this.loadConfig();
+    const providers = this.getProviders();
 
-    config.providers.push({
+    providers.push({
       providerName,
       username,
       token,
       url,
     });
 
-    this.writeConfig(config);
+    config.set('providers', providers);
   }
 
   static updateProvider(
@@ -52,63 +50,33 @@ export default class Config {
     username: string,
     token: string,
   ): void {
-    const config = this.loadConfig();
-    const providerIndex = this.findProvider(providerName, url);
+    const providers = this.getProviders();
+    const providerIndex = this.findProvider(providers, providerName, url);
 
     if (providerIndex < 0) return;
 
-    config.providers[providerIndex].username = username;
-    config.providers[providerIndex].token = token;
+    providers[providerIndex].username = username;
+    providers[providerIndex].token = token;
 
-    this.writeConfig(config);
+    config.set('providers', providers);
   }
 
   static providerExists(providerName: ProviderName, url?: string) {
-    return this.findProvider(providerName, url) >= 0;
+    const providers = this.getProviders();
+    return this.findProvider(providers, providerName, url) >= 0;
   }
 
-  private static findProvider(providerName: ProviderName, url?: string) {
-    return this.loadConfig().providers.findIndex((provider) => (
+  private static findProvider(
+    providers: ProviderConfig[],
+    providerName: ProviderName,
+    url?: string,
+  ) {
+    return providers.findIndex((provider) => (
       provider.providerName === providerName && provider.url === url
     ));
   }
 
-  private static loadConfig(): ConfigFile {
-    const configPath = this.getConfigPath();
-
-    if (!fs.existsSync(configPath)) {
-      return this.createDefaultConfig();
-    }
-
-    const body = fs.readFileSync(configPath);
-
-    return JSON.parse(body.toString()) as ConfigFile;
-  }
-
-  private static writeConfig(config: ConfigFile): void {
-    const body = JSON.stringify(config);
-    fs.writeFileSync(this.getConfigPath(), body);
-  }
-
-  private static createDefaultConfig(): ConfigFile {
-    this.createConfigDir();
-    this.writeConfig(defaultConfig);
-    return defaultConfig;
-  }
-
-  private static getConfigPath(): string {
-    return path.join(this.getConfigDir(), 'config.json');
-  }
-
   static getConfigDir(): string {
     return path.join(os.homedir(), '.freted');
-  }
-
-  private static createConfigDir() {
-    const configDirPath = this.getConfigDir();
-
-    if (!fs.existsSync(configDirPath)) {
-      fs.mkdirSync(configDirPath, { recursive: true });
-    }
   }
 }

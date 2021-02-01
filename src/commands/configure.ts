@@ -17,11 +17,23 @@ export default class Configure extends Command {
         type: 'input',
         default: Config.getWorkspacePath(),
       },
+      {
+        name: 'traefikPort',
+        message: 'Traefik port',
+        type: 'input',
+        default: Config.get('traefikPort', 80),
+      },
+      {
+        name: 'traefikDashboardPort',
+        message: 'Traefik dashboard port',
+        type: 'input',
+        default: Config.get('traefikDashboardPort', 8080),
+      },
     ]);
 
-    const { workspacePath } = answers;
-
-    Config.setWorkspacePath(workspacePath);
+    for (const configKey in answers) {
+      Config.set(configKey, (answers as any)[configKey]);
+    }
 
     this.log('Configuration has been saved.');
   }
