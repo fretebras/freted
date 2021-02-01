@@ -3,7 +3,7 @@ import NetworkDependency from './core-dependencies/network';
 
 export default class Network {
   async connectContainer(name: string) {
-    if (this.isContainerConnected(name)) {
+    if (await this.isContainerConnected(name)) {
       return;
     }
 
