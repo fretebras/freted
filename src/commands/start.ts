@@ -150,6 +150,5 @@ export default class Start extends Command {
     subprocess.stdout.on('data', (data) => onUpdate(data.toString()));
 
     await subprocess;
-    await this.manager.setup(service, onUpdate);
   }
 }
